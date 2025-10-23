@@ -69,16 +69,16 @@ All torques are scalars
 
 # Drag Forces
 def sidedrag_F(vss):
-    return (0.5 * rhoA * vss**2 * Cdside, 0)
+    return (-0.5 * rhoA * vss**2 * Cdside, 0)
 
 def vertdrag_F(vy):
-    return (0, 0.5 * rhoA * vy**2 * cd_wingperp * (WingArea))
+    return (0, -0.5 * rhoA * vy**2 * cd_wingperp * (WingArea))
 
 
 #Drag Torque
 def rotdrag_T(w): #LATEX
     #integral of F (prop to v^2) over the lever arm (increases linearly)
-    unitlengthdrag = 0.5 * rhoA * (w**2) * cd_wingperp * WingWidth
+    unitlengthdrag = -0.5 * rhoA * (w**2) * cd_wingperp * WingWidth
     LeverLength = WingLength*WingLength / 2  # triangle: integral of length from 0 to WingLength
     return unitlengthdrag * LeverLength
 
@@ -130,7 +130,32 @@ def side_slip_angle(vy, vss):
     return math.degrees(math.atan2(vy, vss))
 
 def AoAR(b, bank):
-    hor = vss
-    vert = vy
-
+    #hor = vss
+    #vert = vy
+    ## AOA incomplete
     return a_default - b * math.cos(rad(bank))
+
+
+
+# Net Force and Torques
+
+def Fnety (bank, vy, AoA=a_default):
+    weight = weight_F()[1]
+    vertdrag = vertdrag_F(vy)[1]
+    leftlift = leftlift_F(bank, AoA)[1]
+    rightlift = rightlift_F(bank, AoA)[1]
+
+    return weight + leftlift + rightlift + vertdrag
+
+def Fnetx (bank, vss, AoA=a_default):
+    sidedrag = sidedrag_F(vss)[0]
+    leftlift = leftlift_F(bank, AoA)[0]
+    rightlift = rightlift_F(bank, AoA)[0]
+
+    return sidedrag + leftlift + rightlift
+
+def Tnet (bank, w, AoA=a_default):
+    left_T = leftlift_T(leftlift_F(bank, AoA))
+    right_T = rightlift_T(rightlift_F(bank, AoA))
+    rotdrag_T = rotdrag_T(w)
+    return left_T + right_T + rotdrag_T
