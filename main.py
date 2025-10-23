@@ -1,4 +1,5 @@
 import arcade
+import physics as P
 
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 700
