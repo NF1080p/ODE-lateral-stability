@@ -3,16 +3,16 @@ import math
 
 
 # Variables
-dihedral = 0 # positive for dihedral, negative for anhedral
+dihedral = 4 # positive for dihedral, negative for anhedral
 
 
 WingLength = 3 # half the wingspan
 WingWidth = 1 # chord length
-BodyArea = 5 # for Cfside
+BodyArea = 5 # for Cfside, assume the body is roughly cylindrical so this acts for vertical drag and sideslip drag
 
 a_default = 4 # angle of attack in deg
-CLift_a0 = 0.25  # lift coefficient NACA 2414
-CL_slope = 0.2 # rise per deg
+cLift_a0 = 0.25  # lift coefficient NACA 2414
+cL_slope = 0.2 # rise per deg
 Mass = 1000  # mass in kg
 
 
@@ -33,7 +33,6 @@ P0 = 101325  # sea level standard pressure Pa
 T0 = 288.15  # sea level standard temperature K
 
 cd_body = 0.47 #sphere
-cd_wingperp = 1 #flat plate perpendicular to flow
 
 # Calculated Constants
 #LATEX
@@ -43,68 +42,73 @@ rhoA = 1/((R0/M*TA)/PA)  # ambient density at altitude (ideal gas law)
 
 WingArea = WingLength * WingWidth * 2 # for Cfrot
 
-Cdside = BodyArea * cd_body # sideslip drag coefficient, note that the whole wing does not move at the same speed
+Cdbody = BodyArea * cd_body # sideslip drag coefficient, note that the whole wing does not move at the same speed
 
-a_default = (Mass*g / (2* 0.5 * rhoA * cruise**2 * (WingArea/2) * math.cos(math.pi*dihedral/180)) - CLift_a0) / CL_slope # for mass to cancel with lift
+a_default = (Mass*g / (2* 0.5 * rhoA * cruise**2 * (WingArea/2) * math.cos(math.pi*dihedral/180)) - cLift_a0) / cL_slope # for mass to cancel with lift
      
 
 def globalize_physics_vars():
-     dihedral = 0 # positive for dihedral, negative for anhedral
+     # Variables
+    dihedral = 0 # positive for dihedral, negative for anhedral
 
 
-     WingLength = 3 # half the wingspan
-     WingWidth = 1 # chord length
-     BodyArea = 5 # for Cfside
+    WingLength = 3 # half the wingspan
+    WingWidth = 1 # chord length
+    BodyArea = 5 # for Cfside, assume the body is roughly cylindrical so this acts for vertical drag and sideslip drag
 
-     a_default = 4 # angle of attack in deg
-     CLift_a0 = 0.25  # lift coefficient NACA 2414
-     CL_slope = 0.2 # rise per deg
-     Mass = 1000  # mass in kg
+    a_default = 4 # angle of attack in deg
+    cLift_a0 = 0.25  # lift coefficient NACA 2414
+    cL_slope = 0.2 # rise per deg
+    Mass = 1000  # mass in kg
 
 
 
-     altitude = 1000  # altitude in feet up to FL400
-     cruise = 52  # cruise speed in m/s (1.94 knots = 1 m/s)
+    altitude = 1000  # altitude in feet up to FL400
+    cruise = 52  # cruise speed in m/s (1.94 knots = 1 m/s)
 
 
 
     # Constants
-     R0=8.314
-     cp=1005  # specific heat at constant pressure for air
-     M = 0.02897  # molar mass of air
-     L = -2
-     g = 9.81
-     rho0 = 1.225  # sea level standard density kg/m^3
-     P0 = 101325  # sea level standard pressure Pa
-     T0 = 288.15  # sea level standard temperature K
+    R0=8.314
+    cp=1005  # specific heat at constant pressure for air
+    M = 0.02897  # molar mass of air
+    L = -2
+    g = 9.81
+    rho0 = 1.225  # sea level standard density kg/m^3
+    P0 = 101325  # sea level standard pressure Pa
+    T0 = 288.15  # sea level standard temperature K
 
-     cd_body = 0.47 #sphere
-     cd_wingperp = 1 #flat plate perpendicular to flow
+    cd_body = 0.47 #sphere
 
     # Calculated Constants
     #LATEX
-     PA = P0 * (1+g*altitude/(cp*T0))**(-cp*M/R0)  # ambient pressure at altitude https://en.wikipedia.org/wiki/Atmospheric_pressure
-     TA = T0 + (L*altitude/1000)  # ambient temperature at altitude
-     rhoA = 1/((R0/M*TA)/PA)  # ambient density at altitude (ideal gas law)
+    PA = P0 * (1+g*altitude/(cp*T0))**(-cp*M/R0)  # ambient pressure at altitude https://en.wikipedia.org/wiki/Atmospheric_pressure
+    TA = T0 + (L*altitude/1000)  # ambient temperature at altitude
+    rhoA = 1/((R0/M*TA)/PA)  # ambient density at altitude (ideal gas law)
 
-     WingArea = WingLength * WingWidth * 2 # for Cfrot
+    WingArea = WingLength * WingWidth * 2 # for Cfrot
 
-     Cdside = BodyArea * cd_body # sideslip drag coefficient, note that the whole wing does not move at the same speed
+    Cdbody = BodyArea * cd_body # sideslip drag coefficient, note that the whole wing does not move at the same speed
 
-     a_default = (Mass*g / (2* 0.5 * rhoA * cruise**2 * (WingArea/2) * math.cos(math.pi*dihedral/180)) - CLift_a0) / CL_slope # for mass to cancel with lift
+    a_default = (Mass*g / (2* 0.5 * rhoA * cruise**2 * (WingArea/2) * math.cos(math.pi*dihedral/180)) - cLift_a0) / cL_slope # for mass to cancel with lift
      
-     _physics_vars = [
+    _physics_vars = [
         "dihedral", "WingLength", "WingWidth", "BodyArea",
-        "a_default", "CLift_a0", "CL_slope", "Mass",
+        "a_default", "cLift_a0", "cL_slope", "Mass",
         "altitude", "cruise",
         "R0", "cp", "M", "L", "g", "rho0", "P0", "T0",
-        "cd_body", "cd_wingperp",
-        "PA", "TA", "rhoA", "WingArea", "Cdside"
+        "cd_body", "Cdbody",
+        "PA", "TA", "rhoA", "WingArea"
     ]
      
-     for _name in _physics_vars:
+    for _name in _physics_vars:
         globals()[_name] = locals()[_name]
-
+    
+    print("Dihedral:", dihedral)
+    print("Wing Area:", WingArea)
+    print("Cruise Speed:", cruise)
+    print("Altitude:", altitude)
+    print("AoA cruise:", a_default)
 
 # assumptions, pressure does not change much with slight altitude changes
 
@@ -134,24 +138,24 @@ All torques are scalars
 def sidedrag_F(vss):
     if vss < 0:
         # slipping left, so drag to the right (+)
-        return (0.5 * rhoA * vss**2 * Cdside, 0)
+        return (0.5 * rhoA * vss**2 * Cdbody, 0)
     else:
         # slipping right, so drag to the left (-)
-        return (-0.5 * rhoA * vss**2 * Cdside, 0)
+        return (-0.5 * rhoA * vss**2 * Cdbody, 0)
 
 def vertdrag_F(vy):
     if vy < 0:
         # falling down, so drag up (+)
-        return (0, 0.5 * rhoA * vy**2 * cd_wingperp * (WingArea))
+        return (0, 0.5 * rhoA * vy**2 * Cdbody)
     else:
         # going up, so drag down (-)
-        return (0, -0.5 * rhoA * vy**2 * cd_wingperp * (WingArea))
+        return (0, -0.5 * rhoA * vy**2 * Cdbody)
 
 
 #Drag Torque
 def rotdrag_T(w): #LATEX
     #integral of F (prop to v^2) over the lever arm (increases linearly)
-    unitlengthdrag = -0.5 * rhoA * (w**2) * cd_wingperp * WingWidth
+    unitlengthdrag = -0.5 * rhoA * (w**2) * 1 * WingWidth
     LeverLength = WingLength*WingLength / 2  # triangle: integral of length from 0 to WingLength
     return unitlengthdrag * LeverLength
 
@@ -161,8 +165,8 @@ def rotdrag_T(w): #LATEX
 def leftlift_F(bank, AoA=a_default):
     # right from our POV
     v = cruise
-    CLift = CLift_a0 + CL_slope * AoA
-    TotalLiftLeft = 0.5 * rhoA * v**2 * CLift * (WingArea/2)
+    cLift = cLift_a0 + cL_slope * AoA
+    TotalLiftLeft = 0.5 * rhoA * v**2 * cLift * (WingArea/2)
 
     LiftY = TotalLiftLeft * math.cos(rad(dihedral)+rad(bank))
     LiftX = TotalLiftLeft * math.sin(rad(dihedral)+rad(bank))
@@ -172,8 +176,8 @@ def leftlift_F(bank, AoA=a_default):
 def rightlift_F(bank, AoA=a_default):
     # left from our POV
     v = cruise
-    CLift = CLift_a0 + CL_slope * AoA
-    TotalLiftRight = 0.5 * rhoA * v**2 * CLift * (WingArea/2)
+    cLift = cLift_a0 + cL_slope * AoA
+    TotalLiftRight = 0.5 * rhoA * v**2 * cLift * (WingArea/2)
 
     LiftY = TotalLiftRight * math.cos(rad(dihedral)-rad(bank))
     # needs to be negative because angles are taken in opposite direction when calcing phi-beta (see LiftX in downloads)
@@ -206,22 +210,29 @@ def side_slip_angle(vy, vss):
 
 def AoAR(vss, vy, bank):
     # take the component of airflow (-velocity) perpendicular to the right wing
-    vsseff = -vss*math.cos(rad(bank-dihedral))
-    vyeff = -vy*math.sin(rad(bank-dihedral))
+    vsseff = vss*math.sin(rad(bank-dihedral))
+    vyeff = vy*math.cos(rad(bank-dihedral))
     
     # find total angle deviation from cruise deflecting in angle perpendicular to right wing
     AoAadj = math.degrees(math.atan2(vyeff+vsseff, cruise))
-    
+
+    # Stall condition
+    if ((a_default - AoAadj) > 15) | ((a_default - AoAadj) < -15):
+        raise ValueError
+
     return a_default - AoAadj
 
 def AoAL(vss, vy, bank):
     # take the component of airflow (-velocity) perpendicular to the left wing
-    vsseff = vss*math.cos(rad(bank+dihedral))
-    vyeff = vy*math.sin(rad(bank+dihedral))
-    
+    vsseff = vss*math.sin(rad(bank+dihedral))
+    vyeff = vy*math.cos(rad(bank+dihedral))
     # find total angle deviation from cruise deflecting in angle perpendicular to left wing
     AoAadj = math.degrees(math.atan2(vyeff+vsseff, cruise))
-    
+
+    # Stall condition
+    if ((a_default - AoAadj) > 15) | ((a_default - AoAadj) < -15):
+        raise ValueError
+
     return a_default - AoAadj
 
 
@@ -253,9 +264,9 @@ if __name__ == "__main__":
     globalize_physics_vars()
 
     # AI simple test
-    bank = 0  # degrees counter clockwise    _o/
+    bank = 10  # degrees counter clockwise    _o/
     vy = 0  # m/s down
-    vss = -0.5  # m/s slipping left (air flow right)
+    vss = 2 # m/s slipping left (air flow right)
     w = 0  # rad/s
     print("a_default" + ": ", a_default)
     
