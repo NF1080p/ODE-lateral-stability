@@ -1,6 +1,8 @@
 import pyglet
 from pyglet import shapes
 import math
+from secondOrderDE import second_order_DE_nonlinear
+import physics
 
 # --- Constants ---
 WINDOW_WIDTH = 1000
@@ -64,16 +66,25 @@ class AircraftVisualizer(pyglet.window.Window):
         return (max(0, min(self.cam_x, pic_width - WINDOW_WIDTH)), max(0, min(self.cam_y, pic_height - WINDOW_HEIGHT)))
 
     def update(self, dt):
+
+        # -------------------- #
+
+
+        
+        
+        # -------------------- #
         # Physics
+        #(x,y) = second_order_DE_nonlinear(10, 10, 100, 1)
         self.aircraft_x += -50 * dt 
         self.aircraft_y += -50 * dt
         self.aircraft_angle += 0 * dt
-
+        #self.aircraft_x += x[0] * dt 
+        #self.aircraft_y +=  y[0] * dt
+        #self.aircraft_angle +=  * dt
 
         # Update camera
         self.cam_x, self.cam_y = self.camera()
         
-
         # Update HUD text
         self.label_pos.text = f"Aircraft Pos: ({self.aircraft_x:.1f}, {self.aircraft_y:.1f})"
         self.label_pitch.text = f"Pitch: {self.aircraft_angle:.1f}°"

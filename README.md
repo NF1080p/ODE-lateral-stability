@@ -1,12 +1,5 @@
 # ODE-lateral-stability
 
-
-
-
-
-
-
-
 # ts lowkey pmo twin                                                                                         
 <!--                                                                                          
                                  zzyumhddehmsxzz                                         
@@ -41,3 +34,11 @@
                    zqpwz         zqUSSSRSaz              zxm5SOOPPPWctyz                 
                                 zykUTSSRUdz                  zyxxxyz                     
                                  zxuuuuuux                                                -->
+
+
+
+
+## Dependencies
+Create a python virtual environment and run 
+
+``` pip install numpy matplotlib pyglet ```

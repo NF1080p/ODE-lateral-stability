@@ -1,7 +1,6 @@
 import math
 
 
-
 # Variables
 dihedral = 4 # positive for dihedral, negative for anhedral
 
