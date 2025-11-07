@@ -44,6 +44,7 @@ class AircraftVisualizer(pyglet.window.Window):
         self.background_img = pyglet.image.load("background.jpeg")
         self.background_img.anchor_x = 0
         self.background_img.anchor_y = 0
+        self.runtime = 0.0
 
     def camera(self):
         # Camera
@@ -66,20 +67,17 @@ class AircraftVisualizer(pyglet.window.Window):
         return (max(0, min(self.cam_x, pic_width - WINDOW_WIDTH)), max(0, min(self.cam_y, pic_height - WINDOW_HEIGHT)))
 
     def update(self, dt):
+        self.runtime += dt
 
-        # -------------------- #
-
-
-        
-        
-        # -------------------- #
         # Physics
         #(x,y) = second_order_DE_nonlinear(10, 10, 100, 1)
+
         self.aircraft_x += -50 * dt 
         self.aircraft_y += -50 * dt
         self.aircraft_angle += 0 * dt
-        #self.aircraft_x += x[0] * dt 
-        #self.aircraft_y +=  y[0] * dt
+
+        #self.aircraft_x += x[int(self.runtime)] 
+        #self.aircraft_y +=  y[int(self.runtime)]
         #self.aircraft_angle +=  * dt
 
         # Update camera
@@ -118,6 +116,11 @@ class AircraftVisualizer(pyglet.window.Window):
         py = self.aircraft_y - self.cam_y
         # create shape with center at px, py
         rectangle = shapes.Rectangle(px-wing/2, py-length/2, wing/2, length/2, color=(255, 22, 20), batch=aircraft)
+        # rotation
+        rectangle.anchor_x = wing/4
+        rectangle.anchor_y = length/4
+        rectangle.rotation = self.aircraft_angle
+
         # draw aircraft
         aircraft.draw()
 
@@ -130,3 +133,13 @@ class AircraftVisualizer(pyglet.window.Window):
 if __name__ == "__main__":
     window = AircraftVisualizer()
     pyglet.app.run()
+
+
+
+# todo:
+'''
+ figure out how to implement physics engine into visualizer
+ we have numerical solution to system of odes
+ time 
+
+'''

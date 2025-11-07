@@ -55,9 +55,11 @@ def second_order_DE_nonlinear(y0, yprime0, steps, endval):
     for n in range(0, len(t)-1):
         dt = t[n+1]-t[n] # we could play with variable time intervals
         # euler's method: 
-        ddy = -physics.g -0.5/physics.Mass * physics.rhoA * physics.cd_body * abs(dy[n])*dy[n] + physics.leftlift_F(physics.bank, physics.a_default)[1]/physics.Mass + physics.rightlift_F(physics.bank, physics.a_default)[1]/physics.Mass
+        #ddy = -physics.g -0.5/physics.Mass * physics.rhoA * physics.cd_body * abs(dy[n])*dy[n] + physics.leftlift_F(physics.bank, physics.a_default)[1]/physics.Mass + physics.rightlift_F(physics.bank, physics.a_default)[1]/physics.Mass
+        ddy = -physics.g -0.5/physics.Mass * physics.rhoA * physics.cd_body * abs(dy[n])*dy[n] + physics.leftlift_F(0.005, physics.a_default)[1]/physics.Mass + physics.rightlift_F(5, physics.a_default)[1]/physics.Mass
 
-        ddx = (1/physics.Mass) * physics.Fnetx(physics.vss, physics.vy, physics.bank)
+        #ddx = (1/physics.Mass) * physics.Fnetx(physics.vss, physics.vy, physics.bank) #tempp
+        ddx = (1/physics.Mass) * physics.Fnetx(0.001, 0.001, 5)
 
         # y update
         y[n+1] = y[n] + dy[n]*dt
@@ -110,15 +112,17 @@ def plot_solution(y, steps, endval):
     plt.title("a cool title here")
     plt.show()
        
-# test case 
-y0 = 1; v0 = 0;
-endval = 2*np.pi; steps = 100
-f_t = np.zeros(steps)
-output = second_order_DE(y0, v0, 1, 0, 1, f_t, steps, endval)
-plot_solution(output, steps, endval)
 
-    # todo:
-    #  - implement a runga kutta algo 
-    #  - vectorize it so it works for linear systems
+if __name__ == "__main__":
+    # test case 
+    y0 = 1; v0 = 0
+    endval = 2*np.pi; steps = 100
+    f_t = np.zeros(steps)
+    output = second_order_DE(y0, v0, 1, 0, 1, f_t, steps, endval)
+    plot_solution(output, steps, endval)
+
+        # todo:
+        #  - implement a runga kutta algo 
+        #  - vectorize it so it works for linear systems
 
 
