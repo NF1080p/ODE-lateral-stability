@@ -4,6 +4,7 @@ import math
 # Variables
 dihedral = 4 # positive for dihedral, negative for anhedral
 
+I_roll = 1000 # moment of inertial about roll axis
 
 WingLength = 3 # half the wingspan
 WingWidth = 1 # chord length
@@ -217,7 +218,7 @@ def AoAR(vss, vy, bank):
 
     # Stall condition
     if ((a_default - AoAadj) > 15) | ((a_default - AoAadj) < -15):
-        raise ValueError
+        raise ValueError("stall condition")
 
     return a_default - AoAadj
 
@@ -230,7 +231,7 @@ def AoAL(vss, vy, bank):
 
     # Stall condition
     if ((a_default - AoAadj) > 15) | ((a_default - AoAadj) < -15):
-        raise ValueError
+        raise ValueError("stall condition")
 
     return a_default - AoAadj
 

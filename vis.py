@@ -9,6 +9,8 @@ WINDOW_WIDTH = 1000
 WINDOW_HEIGHT = 700
 VIEWPORT_MARGIN = 100  # pixels from edge before camera moves
 
+NUM_OF_FRAMES = 60
+SIM_TIME = 3
 # Background image
 # https://unsplash.com/photos/sky-cloud-blue-background-paronama-web-cloudy-summer-winter-season-day-light-beauty-horizon-spring-brigth-gradient-calm-abstract-backdrop-air-nature-view-wallpaper-landscape-cyan-color-environment-wkVWKgeyEEs
 # 3000x1097
@@ -38,13 +40,26 @@ class AircraftVisualizer(pyglet.window.Window):
         self.label_pitch = pyglet.text.Label('', x=10, y=WINDOW_HEIGHT-60)
 
         # 60 FPS
-        pyglet.clock.schedule_interval(self.update, 1/60.0)
+        pyglet.clock.schedule_interval(self.update, float(1/NUM_OF_FRAMES))
 
         # Load background image
         self.background_img = pyglet.image.load("background.jpeg")
         self.background_img.anchor_x = 0
         self.background_img.anchor_y = 0
         self.runtime = 0.0
+        
+        # Run physics engine
+        x0 = 100
+        y0 = 100 
+        bank0 = 5 
+        xprime0 = 1 
+        yprime0 = 0 
+        bankprime0 = 0
+        
+        (self.x_sim, self.y_sim, self.bank_sim) = second_order_DE_nonlinear(
+            x0, xprime0, y0, yprime0, bank0, bankprime0, 
+            int(SIM_TIME * NUM_OF_FRAMES), SIM_TIME 
+        )
 
     def camera(self):
         # Camera
@@ -68,17 +83,15 @@ class AircraftVisualizer(pyglet.window.Window):
 
     def update(self, dt):
         self.runtime += dt
+        endIndex = SIM_TIME * NUM_OF_FRAMES - 1
+        curIndex = int(self.runtime * NUM_OF_FRAMES)
 
-        # Physics
-        #(x,y) = second_order_DE_nonlinear(10, 10, 100, 1)
+        if (curIndex >= endIndex):
+            curIndex = endIndex
 
-        self.aircraft_x += -50 * dt 
-        self.aircraft_y += -50 * dt
-        self.aircraft_angle += 0 * dt
-
-        #self.aircraft_x += x[int(self.runtime)] 
-        #self.aircraft_y +=  y[int(self.runtime)]
-        #self.aircraft_angle +=  * dt
+        self.aircraft_x = self.x_sim[curIndex]
+        self.aircraft_y = self.y_sim[curIndex]
+        self.aircraft_angle = self.bank_sim[curIndex]
 
         # Update camera
         self.cam_x, self.cam_y = self.camera()
@@ -86,6 +99,7 @@ class AircraftVisualizer(pyglet.window.Window):
         # Update HUD text
         self.label_pos.text = f"Aircraft Pos: ({self.aircraft_x:.1f}, {self.aircraft_y:.1f})"
         self.label_pitch.text = f"Pitch: {self.aircraft_angle:.1f}°"
+        # should this be bank angle
 
     def on_draw(self):
         self.clear()

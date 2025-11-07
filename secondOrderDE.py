@@ -30,9 +30,9 @@ def second_order_DE(y0, yprime0, a, b, c, f_t, steps, endval):
 
     return y
 
-def second_order_DE_nonlinear(y0, yprime0, steps, endval):
+def second_order_DE_nonlinear(y0, yprime0, x0, xprime0, bank0, bankprime0, steps, endval):
     """
-    Solves second order differential equation of form ay'' + by'|y'| + c = 0 
+    Euler's method to solve second order DE for lateral aircraft motion
     Args:
         y0 (float): initial condition for y
         yprime0 (float): initial condition for y'
@@ -44,22 +44,29 @@ def second_order_DE_nonlinear(y0, yprime0, steps, endval):
     """
     # generate t for plotting
     t = np.linspace(0, endval, steps)
-    y = np.zeros(len(t))
-    x = np.zeros(len(t))
-    dy = np.zeros(len(t))
-    dx = np.zeros(len(t))
+    lent = len(t)+5
+    y = np.zeros(lent)
+    x = np.zeros(lent)
+    bank = np.zeros(lent)
+    dy = np.zeros(lent)
+    dx = np.zeros(lent)
+    dbank = np.zeros(lent)
     # initial conditions
     y[0] = y0
-    dy[0] = yprime0 
+    dy[0] = yprime0
+    x[0] = x0
+    dx[0] = xprime0
+    bank[0] = bank0
+    dbank[0] = bankprime0
 
     for n in range(0, len(t)-1):
         dt = t[n+1]-t[n] # we could play with variable time intervals
         # euler's method: 
-        #ddy = -physics.g -0.5/physics.Mass * physics.rhoA * physics.cd_body * abs(dy[n])*dy[n] + physics.leftlift_F(physics.bank, physics.a_default)[1]/physics.Mass + physics.rightlift_F(physics.bank, physics.a_default)[1]/physics.Mass
-        ddy = -physics.g -0.5/physics.Mass * physics.rhoA * physics.cd_body * abs(dy[n])*dy[n] + physics.leftlift_F(0.005, physics.a_default)[1]/physics.Mass + physics.rightlift_F(5, physics.a_default)[1]/physics.Mass
+        ddy = -physics.g -0.5/physics.Mass * physics.rhoA * physics.cd_body * abs(dy[n])*dy[n] + physics.leftlift_F(bank[n], physics.a_default)[1]/physics.Mass + physics.rightlift_F(bank[0], physics.a_default)[1]/physics.Mass
 
-        #ddx = (1/physics.Mass) * physics.Fnetx(physics.vss, physics.vy, physics.bank) #tempp
-        ddx = (1/physics.Mass) * physics.Fnetx(0.001, 0.001, 5)
+        ddx = (1/physics.Mass) * physics.Fnetx(dx[n], dy[n], bank[n]) # inputs to Fnetx are vss, vy, bank
+
+        ddbank = (1/physics.I_roll) * physics.Tnet(dx[n], dy[n], bank[n], dbank[n]) # inputs to Tnet are vss, vy, bank, w
 
         # y update
         y[n+1] = y[n] + dy[n]*dt
@@ -68,8 +75,12 @@ def second_order_DE_nonlinear(y0, yprime0, steps, endval):
         # x update
         x[n+1] = x[n] + dx[n]*dt
         dx[n+1] = dx[n] + ddx*dt
-        
-    return (x, y) 
+
+        # bank update
+        bank[n+1] = bank[n] + dbank[n]*dt
+        dbank[n+1] = dbank[n] + ddbank*dt
+
+    return (x, y, bank)
 
     
 def second_order_RK_simple_case(y, yprime, steps, endval):
