@@ -10,8 +10,8 @@ WINDOW_WIDTH = 1000
 WINDOW_HEIGHT = 700
 VIEWPORT_MARGIN = 100  # pixels from edge before camera moves
 
-NUM_OF_FRAMES = 60
-SIM_TIME = 10
+NUM_OF_FRAMES = 30
+SIM_TIME = 20 
 # Background image
 # https://unsplash.com/photos/sky-cloud-blue-background-paronama-web-cloudy-summer-winter-season-day-light-beauty-horizon-spring-brigth-gradient-calm-abstract-backdrop-air-nature-view-wallpaper-landscape-cyan-color-environment-wkVWKgeyEEs
 # 3000x1097
@@ -50,10 +50,10 @@ class AircraftVisualizer(pyglet.window.Window):
         self.runtime = 0.0
         
         # Run physics engine
-        x0 = 100
-        y0 = 100 
-        bank0 = 5 
-        xprime0 = 1 
+        x0 = self.aircraft_x
+        y0 = self.aircraft_y 
+        bank0 = self.aircraft_angle 
+        xprime0 = 0 
         yprime0 = 0 
         bankprime0 = 0
         

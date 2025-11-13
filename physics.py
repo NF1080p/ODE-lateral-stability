@@ -2,7 +2,7 @@ import math
 
 
 # Variables
-dihedral = 4 # positive for dihedral, negative for anhedral
+dihedral = -3 # positive for dihedral, negative for anhedral
 
 I_roll = 1000 # moment of inertial about roll axis
 
