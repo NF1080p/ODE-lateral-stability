@@ -30,6 +30,103 @@ def second_order_DE(y0, yprime0, a, b, c, f_t, steps, endval):
 
     return y
 
+def second_order_DE_nonlinear_rk4_one_step(y0, yprime0, x0, xprime0, bank0, bankprime0, dt):
+    """
+    Euler's method to solve second order DE for lateral aircraft motion
+    Args:
+        y0 (float): initial condition for y
+        yprime0 (float): initial condition for y'
+        a (float): coefficient of y''
+        b (float): coefficient of y'
+        c (float): coefficient of y
+        steps (int): number of time steps
+        endval (int): simulate upto t = endval
+    """
+    # generate t for plotting
+    y = y0
+    dy = yprime0
+    x = x0
+    dx = xprime0
+    bank = bank0
+    dbank = bankprime0
+
+    # derivative functions to handle different inputs easy
+    def f_dy(dy):
+        return dy
+    def f_ddy(dy, bank):
+        return -physics.g -0.5/physics.Mass * physics.rhoA * physics.cd_body * abs(dy)*dy + physics.leftlift_F(bank, physics.a_default)[1]/physics.Mass + physics.rightlift_F(bank, physics.a_default)[1]/physics.Mass
+    
+    def f_dx(dx):
+        return dx 
+    
+    def f_ddx(dx, dy, bank):
+        return (1/physics.Mass) * physics.Fnetx(dx, dy, bank) # inputs to Fnetx are vss, vy, bank
+    
+    def f_dbank(dbank):
+        return dbank
+    
+    def f_ddbank(dx, dy, bank, dbank):
+        return (1/physics.I_roll) * physics.Tnet(dx, dy, bank, dbank) # inputs to Tnet are vss, vy, bank, w
+
+    #rk4 !!!
+
+    # y substeps
+
+    k1_y = dt * f_dy(dy)
+    k1_dy = dt * f_ddy(dy, bank)
+    
+    k2_y = dt * f_dy(dy + 0.5*k1_dy)
+    k2_dy = dt * f_ddy(dy + 0.5*k1_dy, bank + 0.5*dt*dbank)
+    
+    k3_y = dt * f_dy(dy + 0.5*k2_dy)
+    k3_dy = dt * f_ddy(dy + 0.5*k2_dy, bank + 0.5*dt*dbank)
+    
+    k4_y = dt * f_dy(dy + k3_dy)
+    k4_dy = dt * f_ddy(dy + k3_dy, bank + dt*dbank)
+    
+    # x substeps
+    
+    k1_x = dt * f_dx(dx)
+    k1_dx = dt * f_ddx(dx, dy, bank)
+    
+    k2_x = dt * f_dx(dx + 0.5*k1_dx)
+    k2_dx = dt * f_ddx(dx + 0.5*k1_dx, dy + 0.5*k1_dy, bank + 0.5*dt*dbank)
+    
+    k3_x = dt * f_dx(dx + 0.5*k2_dx)
+    k3_dx = dt * f_ddx(dx + 0.5*k2_dx, dy + 0.5*k2_dy, bank + 0.5*dt*dbank)
+    
+    k4_x = dt * f_dx(dx + k3_dx)
+    k4_dx = dt * f_ddx(dx + k3_dx, dy + k3_dy, bank + dt*dbank)
+    
+    # bank substeps
+    
+    k1_bank = dt * f_dbank(dbank)
+    k1_dbank = dt * f_ddbank(dx, dy, bank, dbank)
+    
+    k2_bank = dt * f_dbank(dbank + 0.5*k1_dbank)
+    k2_dbank = dt * f_ddbank(dx + 0.5*k1_dx, dy + 0.5*k1_dy, 
+                            bank + 0.5*k1_bank, dbank + 0.5*k1_dbank)
+    
+    k3_bank = dt * f_dbank(dbank + 0.5*k2_dbank)
+    k3_dbank = dt * f_ddbank(dx + 0.5*k2_dx, dy + 0.5*k2_dy, 
+                            bank + 0.5*k2_bank, dbank + 0.5*k2_dbank)
+    
+    k4_bank = dt * f_dbank(dbank + k3_dbank)
+    k4_dbank = dt * f_ddbank(dx + k3_dx, dy + k3_dy, 
+                            bank + k3_bank, dbank + k3_dbank)
+    
+    # Update all variables
+    y1 = y + (k1_y + 2*k2_y + 2*k3_y + k4_y) / 6
+    dy1 = dy + (k1_dy + 2*k2_dy + 2*k3_dy + k4_dy) / 6
+    
+    x1 = x + (k1_x + 2*k2_x + 2*k3_x + k4_x) / 6
+    dx1 = dx + (k1_dx + 2*k2_dx + 2*k3_dx + k4_dx) / 6
+    
+    bank1 = bank + (k1_bank + 2*k2_bank + 2*k3_bank + k4_bank) / 6
+    dbank1 = dbank + (k1_dbank + 2*k2_dbank + 2*k3_dbank + k4_dbank) / 6
+
+    return (x1, y1, bank1, dy1, dx1, dbank1)
+
     
 def second_order_DE_nonlinear_rk4(y0, yprime0, x0, xprime0, bank0, bankprime0, steps, endval):
     """
@@ -162,9 +259,9 @@ def second_order_DE_nonlinear(y0, yprime0, x0, xprime0, bank0, bankprime0, steps
     dx = np.zeros(lent)
     dbank = np.zeros(lent)
     # initial conditions
-    y[0] = y0
+    y[0] = y0/20
     dy[0] = yprime0
-    x[0] = x0
+    x[0] = x0/20
     dx[0] = xprime0
     bank[0] = bank0
     dbank[0] = bankprime0

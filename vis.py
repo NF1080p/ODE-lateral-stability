@@ -3,6 +3,7 @@ from pyglet import shapes
 import math
 from secondOrderDE import second_order_DE_nonlinear
 from secondOrderDE import second_order_DE_nonlinear_rk4
+from secondOrderDE import second_order_DE_nonlinear_rk4_one_step
 import physics
 
 # --- Constants ---
@@ -51,9 +52,10 @@ class AircraftVisualizer(pyglet.window.Window):
         
         # Run physics engine
         x0 = self.aircraft_x
+        print(x0)
         y0 = self.aircraft_y 
         bank0 = self.aircraft_angle 
-        xprime0 = 0 
+        xprime0 = 0    
         yprime0 = 0 
         bankprime0 = 0
         
@@ -91,8 +93,12 @@ class AircraftVisualizer(pyglet.window.Window):
             curIndex = endIndex
 
         self.aircraft_x = self.x_sim[curIndex]
-        self.aircraft_y = self.y_sim[curIndex]
-        self.aircraft_angle = self.bank_sim[curIndex]
+       # self.aircraft_y = self.y_sim[curIndex]
+       # self.aircraft_angle = self.bank_sim[curIndex]-
+       
+        #self.aircraft_x += 5
+        self.aircraft_y += -5
+        self.aircraft_angle += 5
 
         # Update camera
         self.cam_x, self.cam_y = self.camera()
