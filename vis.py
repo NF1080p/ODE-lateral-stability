@@ -2,6 +2,7 @@ import pyglet
 from pyglet import shapes
 import math
 from secondOrderDE import second_order_DE_nonlinear
+from secondOrderDE import second_order_DE_nonlinear_rk4
 import physics
 
 # --- Constants ---
@@ -10,7 +11,7 @@ WINDOW_HEIGHT = 700
 VIEWPORT_MARGIN = 100  # pixels from edge before camera moves
 
 NUM_OF_FRAMES = 60
-SIM_TIME = 3
+SIM_TIME = 10
 # Background image
 # https://unsplash.com/photos/sky-cloud-blue-background-paronama-web-cloudy-summer-winter-season-day-light-beauty-horizon-spring-brigth-gradient-calm-abstract-backdrop-air-nature-view-wallpaper-landscape-cyan-color-environment-wkVWKgeyEEs
 # 3000x1097
@@ -56,7 +57,7 @@ class AircraftVisualizer(pyglet.window.Window):
         yprime0 = 0 
         bankprime0 = 0
         
-        (self.x_sim, self.y_sim, self.bank_sim) = second_order_DE_nonlinear(
+        (self.x_sim, self.y_sim, self.bank_sim) = second_order_DE_nonlinear_rk4(
             x0, xprime0, y0, yprime0, bank0, bankprime0, 
             int(SIM_TIME * NUM_OF_FRAMES), SIM_TIME 
         )
