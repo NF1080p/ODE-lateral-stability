@@ -2,7 +2,7 @@ import math
 
 
 # Variables
-dihedral = -3 # positive for dihedral, negative for anhedral
+dihedral = 5 # positive for dihedral, negative for anhedral
 
 I_roll = 1000 # moment of inertial about roll axis
 
@@ -49,7 +49,7 @@ a_default = (Mass*g / (2* 0.5 * rhoA * cruise**2 * (WingArea/2) * math.cos(math.
 
 def globalize_physics_vars():
      # Variables
-    dihedral = 0 # positive for dihedral, negative for anhedral
+    dihedral = 5 # positive for dihedral, negative for anhedral
 
 
     WingLength = 3 # half the wingspan
@@ -155,9 +155,10 @@ def vertdrag_F(vy):
 #Drag Torque
 def rotdrag_T(w): #LATEX
     #integral of F (prop to v^2) over the lever arm (increases linearly)
-    unitlengthdrag = -0.5 * rhoA * (w**2) * 1 * WingWidth
+    average_lin_v = rad(w) * WingLength / 2  # average linear velocity of the wing
+    unitlengthdrag = 0.5 * rhoA * (average_lin_v) * 2 * WingArea
     LeverLength = WingLength*WingLength / 2  # triangle: integral of length from 0 to WingLength
-    return unitlengthdrag * LeverLength
+    return -unitlengthdrag * LeverLength
 
 
 # Lift Forces
@@ -169,7 +170,8 @@ def leftlift_F(bank, AoA=a_default):
     TotalLiftLeft = 0.5 * rhoA * v**2 * cLift * (WingArea/2)
 
     LiftY = TotalLiftLeft * math.cos(rad(dihedral)+rad(bank))
-    LiftX = TotalLiftLeft * math.sin(rad(dihedral)+rad(bank))
+    # negative since with high anhedral or positive bank, the lift points left (-)
+    LiftX = -TotalLiftLeft * math.sin(rad(dihedral)+rad(bank))
 
     return (LiftX, LiftY)
 
@@ -180,8 +182,8 @@ def rightlift_F(bank, AoA=a_default):
     TotalLiftRight = 0.5 * rhoA * v**2 * cLift * (WingArea/2)
 
     LiftY = TotalLiftRight * math.cos(rad(dihedral)-rad(bank))
-    # needs to be negative because angles are taken in opposite direction when calcing phi-beta (see LiftX in downloads)
-    LiftX = -TotalLiftRight * math.sin(rad(dihedral)-rad(bank))
+    # positive since with high dihedral or negative bank, the lift points right (+)
+    LiftX = TotalLiftRight * math.sin(rad(dihedral)-rad(bank))
 
     return (LiftX, LiftY)
 
@@ -210,7 +212,7 @@ def side_slip_angle(vy, vss):
 
 def AoAR(vss, vy, bank):
     # take the component of airflow (-velocity) perpendicular to the right wing
-    vsseff = vss*math.sin(rad(bank-dihedral))
+    vsseff = -vss*math.sin(rad(bank-dihedral))
     vyeff = vy*math.cos(rad(bank-dihedral))
     
     # find total angle deviation from cruise deflecting in angle perpendicular to right wing
@@ -224,13 +226,14 @@ def AoAR(vss, vy, bank):
 
 def AoAL(vss, vy, bank):
     # take the component of airflow (-velocity) perpendicular to the left wing
-    vsseff = vss*math.sin(rad(bank+dihedral))
+
+    vsseff = -vss*math.sin(rad(bank+dihedral))
     vyeff = vy*math.cos(rad(bank+dihedral))
     # find total angle deviation from cruise deflecting in angle perpendicular to left wing
     AoAadj = math.degrees(math.atan2(vyeff+vsseff, cruise))
 
     # Stall condition
-    if ((a_default - AoAadj) > 15) | ((a_default - AoAadj) < -15):
+    if ((a_default - AoAadj) > 30) | ((a_default - AoAadj) < -30):
         raise ValueError("stall condition")
 
     return a_default - AoAadj
@@ -263,11 +266,11 @@ def Tnet (vss, vy, bank, w):
 if __name__ == "__main__":
     globalize_physics_vars()
 
-    # AI simple test
+    # simple test
     bank = 10  # degrees counter clockwise    _o/
     vy = 0  # m/s down
-    vss = 2 # m/s slipping left (air flow right)
-    w = 0  # rad/s
+    vss = +2 # m/s slipping 
+    w = 5  # deg/s
     print("a_default" + ": ", a_default)
     
     #    _o/    slipping <- and falling v

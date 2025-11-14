@@ -4,6 +4,7 @@ import math
 from secondOrderDE import second_order_DE_nonlinear
 from secondOrderDE import second_order_DE_nonlinear_rk4
 from secondOrderDE import second_order_DE_nonlinear_rk4_one_step
+from secondOrderDE import nick_test
 import physics
 
 # --- Constants ---
@@ -11,7 +12,7 @@ WINDOW_WIDTH = 1000
 WINDOW_HEIGHT = 700
 VIEWPORT_MARGIN = 100  # pixels from edge before camera moves
 
-NUM_OF_FRAMES = 30
+NUM_OF_FRAMES = 60
 SIM_TIME = 20 
 # Background image
 # https://unsplash.com/photos/sky-cloud-blue-background-paronama-web-cloudy-summer-winter-season-day-light-beauty-horizon-spring-brigth-gradient-calm-abstract-backdrop-air-nature-view-wallpaper-landscape-cyan-color-environment-wkVWKgeyEEs
@@ -31,7 +32,10 @@ class AircraftVisualizer(pyglet.window.Window):
 
         self.aircraft_x = pic_width/2
         self.aircraft_y = pic_height - WINDOW_HEIGHT/2
-        self.aircraft_angle = 0.0  # degrees
+        self.aircraft_angle = 10.0  # degrees
+        self.aircraft_dx = 0.0
+        self.aircraft_dy = 0.0
+        self.aircraft_dangle = 0.0
 
         # Camera init pos (defining top-left corner)
         self.cam_x = pic_width/2 - WINDOW_WIDTH / 2
@@ -50,19 +54,7 @@ class AircraftVisualizer(pyglet.window.Window):
         self.background_img.anchor_y = 0
         self.runtime = 0.0
         
-        # Run physics engine
-        x0 = self.aircraft_x
-        print(x0)
-        y0 = self.aircraft_y 
-        bank0 = self.aircraft_angle 
-        xprime0 = 0    
-        yprime0 = 0 
-        bankprime0 = 0
-        
-        (self.x_sim, self.y_sim, self.bank_sim) = second_order_DE_nonlinear_rk4(
-            x0, xprime0, y0, yprime0, bank0, bankprime0, 
-            int(SIM_TIME * NUM_OF_FRAMES), SIM_TIME 
-        )
+
 
     def camera(self):
         # Camera
@@ -86,26 +78,30 @@ class AircraftVisualizer(pyglet.window.Window):
 
     def update(self, dt):
         self.runtime += dt
-        endIndex = SIM_TIME * NUM_OF_FRAMES - 1
-        curIndex = int(self.runtime * NUM_OF_FRAMES)
+        
+        # calculate new aircraft properties from previous
+        self.x1, self.y1, self.bank1, self.dx1, self.dy1, self.dbank1 = nick_test(self.aircraft_x, self.aircraft_y, self.aircraft_angle, 
+                                                                                                               self.aircraft_dx, self.aircraft_dy, self.aircraft_dangle, 
+                                                                                                               1/NUM_OF_FRAMES)
 
-        if (curIndex >= endIndex):
-            curIndex = endIndex
-
-        self.aircraft_x = self.x_sim[curIndex]
-       # self.aircraft_y = self.y_sim[curIndex]
-       # self.aircraft_angle = self.bank_sim[curIndex]-
+        #print(f"Time: {self.runtime:.2f}s, Pos: ({self.x1:.2f}, {self.y1:.2f}), Angle: {self.bank1:.2f}°, Vel: ({self.dx1:.2f}, {self.dy1:.2f}), Angular Vel: {self.dbank1:.2f}°/s")
        
-        #self.aircraft_x += 5
-        self.aircraft_y += -5
-        self.aircraft_angle += 5
+        self.aircraft_x = self.x1
+        self.aircraft_y = self.y1
+        self.aircraft_angle = self.bank1
+
+        # Update velocities
+        self.aircraft_dx = self.dx1
+        self.aircraft_dy = self.dy1
+        self.aircraft_dangle = self.dbank1
+        
 
         # Update camera
         self.cam_x, self.cam_y = self.camera()
         
         # Update HUD text
         self.label_pos.text = f"Aircraft Pos: ({self.aircraft_x:.1f}, {self.aircraft_y:.1f})"
-        self.label_pitch.text = f"Pitch: {self.aircraft_angle:.1f}°"
+        self.label_pitch.text = f"Bank: {self.aircraft_angle:.1f}°"
         # should this be bank angle
 
     def on_draw(self):
@@ -140,7 +136,8 @@ class AircraftVisualizer(pyglet.window.Window):
         # rotation
         rectangle.anchor_x = wing/4
         rectangle.anchor_y = length/4
-        rectangle.rotation = self.aircraft_angle
+        # must be negative to agree with convention. rolling right is positive bank angle for pilot's view, angle is between the (pilots) left wing and the horizontal
+        rectangle.rotation = -self.aircraft_angle
 
         # draw aircraft
         aircraft.draw()

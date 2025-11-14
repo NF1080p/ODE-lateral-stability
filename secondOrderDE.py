@@ -30,37 +30,44 @@ def second_order_DE(y0, yprime0, a, b, c, f_t, steps, endval):
 
     return y
 
-def second_order_DE_nonlinear_rk4_one_step(y0, yprime0, x0, xprime0, bank0, bankprime0, dt):
-    """
-    Euler's method to solve second order DE for lateral aircraft motion
-    Args:
-        y0 (float): initial condition for y
-        yprime0 (float): initial condition for y'
-        a (float): coefficient of y''
-        b (float): coefficient of y'
-        c (float): coefficient of y
-        steps (int): number of time steps
-        endval (int): simulate upto t = endval
-    """
-    # generate t for plotting
-    y = y0
-    dy = yprime0
-    x = x0
-    dx = xprime0
-    bank = bank0
-    dbank = bankprime0
+
+def nick_test(x, y, bank, dx, dy, dbank, dt):
+
+    Fnety = physics.Fnety(dx, dy, bank)
+    ya =(1/physics.Mass) * Fnety
+    
+    Fnetx = physics.Fnetx(dx, dy, bank)
+    xa = (1/physics.Mass) * Fnetx # inputs to Fnetx are vss, vy, bank
+
+    
+
+    ba = -(1/physics.I_roll) * physics.Tnet(dx, dy, bank, dbank) # inputs to Tnet are vss, vy, bank, w
+
+    x1 = x + (dx)*dt
+    dx1 = dx + xa*dt
+    y1 = y + (dy)*dt
+    dy1 = dy + ya*dt
+    bank1 = bank + (dbank)*dt
+    dbank1 = dbank + ba*dt
+
+    return(x1, y1, bank1, dx1, dy1, dbank1)
+
+    
+def second_order_DE_nonlinear_rk4_one_step(x, y, bank, dx, dy, dbank, dt):
 
     # derivative functions to handle different inputs easy
     def f_dy(dy):
         return dy
     def f_ddy(dy, bank):
-        return -physics.g -0.5/physics.Mass * physics.rhoA * physics.cd_body * abs(dy)*dy + physics.leftlift_F(bank, physics.a_default)[1]/physics.Mass + physics.rightlift_F(bank, physics.a_default)[1]/physics.Mass
+        Fnety = physics.Fnety(dx, dy, bank)
+        return (1/physics.Mass) * Fnety
     
     def f_dx(dx):
         return dx 
     
     def f_ddx(dx, dy, bank):
-        return (1/physics.Mass) * physics.Fnetx(dx, dy, bank) # inputs to Fnetx are vss, vy, bank
+        Fnetx = physics.Fnetx(dx, dy, bank)
+        return (1/physics.Mass) * Fnetx # inputs to Fnetx are vss, vy, bank
     
     def f_dbank(dbank):
         return dbank
