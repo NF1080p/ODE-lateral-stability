@@ -2,7 +2,7 @@ import math
 
 
 # Variables
-dihedral = 5 # positive for dihedral, negative for anhedral
+dihedral = 0 # positive for dihedral, negative for anhedral
 
 I_roll = 1000 # moment of inertial about roll axis
 
@@ -49,7 +49,7 @@ a_default = (Mass*g / (2* 0.5 * rhoA * cruise**2 * (WingArea/2) * math.cos(math.
 
 def globalize_physics_vars():
      # Variables
-    dihedral = 5 # positive for dihedral, negative for anhedral
+    dihedral = 0 # positive for dihedral, negative for anhedral
 
 
     WingLength = 3 # half the wingspan
@@ -267,7 +267,7 @@ if __name__ == "__main__":
     globalize_physics_vars()
 
     # simple test
-    bank = 10  # degrees counter clockwise    _o/
+    bank = 180  # degrees counter clockwise    _o/
     vy = 0  # m/s down
     vss = +2 # m/s slipping 
     w = 5  # deg/s
