@@ -332,23 +332,40 @@ def second_order_RK_simple_case(y, yprime, steps, endval):
 
         return (x_next, y_next)
 
-
-    
-
-def plot_solution(y, steps, endval):
-    t = np.linspace(0, endval, steps)
-    plt.plot(t, y)
-    plt.title("a cool title here")
+def plot_solution(sol_list, t_list, title="a cool title"):
+    t = np.array(t_list)
+    sol_array = np.array(sol_list)
+    plt.plot(t, sol_list)
+    plt.title(title)
     plt.show()
-       
+    
+def plot_solution_from_file(filename="testing.txt"):
+    # get number of datapoints
+    datapoints = 0
+    x_list = []
+    y_list = []
+    bank_list = []
+    t_list = []
+    with open(filename, 'r') as file:
+        for line in file:
+            values = line.strip().split()
+            x_list.append(float(values[0]))
+            y_list.append(float(values[1]))
+            bank_list.append(float(values[2]))
+            t_list.append(float(values[3]))
+    plot_solution(x_list, t_list, "x vs t")
+    plot_solution(y_list, t_list, "y vs t")
+    plot_solution(bank_list, t_list, "bank vs t")
+    #print(x_list)
 
 if __name__ == "__main__":
     # test case 
-    y0 = 1; v0 = 0
-    endval = 2*np.pi; steps = 100
-    f_t = np.zeros(steps)
-    output = second_order_DE(y0, v0, 1, 0, 1, f_t, steps, endval)
-    plot_solution(output, steps, endval)
+    #y0 = 1; v0 = 0
+    #endval = 2*np.pi; steps = 100
+    #f_t = np.zeros(steps)
+    #output = second_order_DE(y0, v0, 1, 0, 1, f_t, steps, endval)
+    #plot_solution(output, steps, endval)
+    plot_solution_from_file()
 
         # todo:
         #  - implement a runga kutta algo 

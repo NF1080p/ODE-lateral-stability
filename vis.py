@@ -5,6 +5,7 @@ from secondOrderDE import second_order_DE_nonlinear
 from secondOrderDE import second_order_DE_nonlinear_rk4
 from secondOrderDE import second_order_DE_nonlinear_rk4_one_step
 from secondOrderDE import nick_test
+import numpy as np
 import physics
 
 # --- Constants ---
@@ -40,6 +41,12 @@ class AircraftVisualizer(pyglet.window.Window):
         # Camera init pos (defining top-left corner)
         self.cam_x = pic_width/2 - WINDOW_WIDTH / 2
         self.cam_y = pic_height
+        
+        # array to store solutions
+        self.x_sol_list = []
+        self.y_sol_list = []
+        self.bank_sol_list = []
+        self.t_list = []
 
         # HUD labels
         self.label_pos = pyglet.text.Label('', x=10, y=WINDOW_HEIGHT-30)
@@ -94,7 +101,18 @@ class AircraftVisualizer(pyglet.window.Window):
         self.aircraft_dx = self.dx1
         self.aircraft_dy = self.dy1
         self.aircraft_dangle = self.dbank1
-        
+
+        # push current x,y,angle positions to an array
+        self.x_sol_list.append(self.x1)
+        self.y_sol_list.append(self.y1)
+        self.bank_sol_list.append(self.bank1)
+        self.t_list.append(self.runtime)
+        # push to list because np.array slow at appending (?)
+        #print(self.sol_list)
+
+        with open("testing.txt", "a") as f:
+            stringified = str(self.x1) + " " + str(self.y1) + " " + str(self.bank1) + " " + str(self.runtime) + "\n"
+            f.write(stringified)
 
         # Update camera
         self.cam_x, self.cam_y = self.camera()
@@ -102,7 +120,6 @@ class AircraftVisualizer(pyglet.window.Window):
         # Update HUD text
         self.label_pos.text = f"Aircraft Pos: ({self.aircraft_x:.1f}, {self.aircraft_y:.1f})"
         self.label_pitch.text = f"Bank: {self.aircraft_angle:.1f}°"
-        # should this be bank angle
 
     def on_draw(self):
         self.clear()
