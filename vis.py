@@ -27,6 +27,13 @@ class AircraftVisualizer(pyglet.window.Window):
         super().__init__(WINDOW_WIDTH, WINDOW_HEIGHT, "Aircraft Visualizer - Pyglet 2.x")
         pyglet.gl.glClearColor(0.53, 0.81, 0.98, 1.0)  # Sky blue background
 
+        
+
+        # Initialize physics variables
+        physics.globalize_physics_vars(dihedral=10, Mass=1000, WingLength=4, WingWidth=1, BodyArea=5,
+                                       cLift_a0=0.25, cL_slope=0.2,
+                                       altitude=1000, cruise=52, I_roll=1000)
+        
         # Aircraft init state
         # NOTE: COORDNIATES LOAD FROM BOTTOM LEFT
         # (0,0) is bottom-left of background image
@@ -52,6 +59,8 @@ class AircraftVisualizer(pyglet.window.Window):
         self.label_pos = pyglet.text.Label('', x=10, y=WINDOW_HEIGHT-30)
         self.label_pitch = pyglet.text.Label('', x=10, y=WINDOW_HEIGHT-60)
 
+
+        
         # 60 FPS
         pyglet.clock.schedule_interval(self.update, float(1/NUM_OF_FRAMES))
 
@@ -87,7 +96,7 @@ class AircraftVisualizer(pyglet.window.Window):
         self.runtime += dt
         
         # calculate new aircraft properties from previous
-        self.x1, self.y1, self.bank1, self.dx1, self.dy1, self.dbank1 = nick_test(self.aircraft_x, self.aircraft_y, self.aircraft_angle, 
+        self.x1, self.y1, self.bank1, self.dx1, self.dy1, self.dbank1 = second_order_DE_nonlinear_rk4_one_step(self.aircraft_x, self.aircraft_y, self.aircraft_angle, 
                                                                                                                self.aircraft_dx, self.aircraft_dy, self.aircraft_dangle, 
                                                                                                                1/NUM_OF_FRAMES)
 

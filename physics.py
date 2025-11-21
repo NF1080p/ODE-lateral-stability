@@ -6,7 +6,7 @@ dihedral = 0 # positive for dihedral, negative for anhedral
 
 I_roll = 1000 # moment of inertial about roll axis
 
-WingLength = 3 # half the wingspan
+WingLength = 4 # half the wingspan
 WingWidth = 1 # chord length
 BodyArea = 5 # for Cfside, assume the body is roughly cylindrical so this acts for vertical drag and sideslip drag
 
@@ -47,24 +47,27 @@ Cdbody = BodyArea * cd_body # sideslip drag coefficient, note that the whole win
 a_default = (Mass*g / (2* 0.5 * rhoA * cruise**2 * (WingArea/2) * math.cos(math.pi*dihedral/180)) - cLift_a0) / cL_slope # for mass to cancel with lift
      
 
-def globalize_physics_vars():
+def globalize_physics_vars(dihedral=dihedral, WingLength=WingLength, WingWidth=WingWidth, BodyArea=BodyArea,
+                            cLift_a0=cLift_a0, cL_slope=cL_slope, Mass=Mass,
+                            altitude=altitude, cruise=cruise, I_roll=I_roll):
      # Variables
-    dihedral = 0 # positive for dihedral, negative for anhedral
+    dihedral = dihedral # positive for dihedral, negative for anhedral
 
 
-    WingLength = 3 # half the wingspan
-    WingWidth = 1 # chord length
-    BodyArea = 5 # for Cfside, assume the body is roughly cylindrical so this acts for vertical drag and sideslip drag
+    WingLength = WingLength # half the wingspan
+    WingWidth = WingWidth # chord length
+    BodyArea = BodyArea # for Cfside, assume the body is roughly cylindrical so this acts for vertical drag and sideslip drag
 
-    a_default = 4 # angle of attack in deg
-    cLift_a0 = 0.25  # lift coefficient NACA 2414
-    cL_slope = 0.2 # rise per deg
-    Mass = 1000  # mass in kg
+    # a_default = a_default # angle of attack in deg
+    cLift_a0 = cLift_a0  # lift coefficient NACA 2414
+    cL_slope = cL_slope # rise per deg
+    Mass = Mass  # mass in kg
+
+    I_roll = I_roll # moment of inertial about roll axis
 
 
-
-    altitude = 1000  # altitude in feet up to FL400
-    cruise = 52  # cruise speed in m/s (1.94 knots = 1 m/s)
+    altitude = altitude  # altitude in feet up to FL400
+    cruise = cruise  # cruise speed in m/s (1.94 knots = 1 m/s)
 
 
 
@@ -90,6 +93,8 @@ def globalize_physics_vars():
 
     Cdbody = BodyArea * cd_body # sideslip drag coefficient, note that the whole wing does not move at the same speed
 
+
+    # calculate a_default for given mass such that lift cancels weight at cruise
     a_default = (Mass*g / (2* 0.5 * rhoA * cruise**2 * (WingArea/2) * math.cos(math.pi*dihedral/180)) - cLift_a0) / cL_slope # for mass to cancel with lift
      
     _physics_vars = [
@@ -98,7 +103,7 @@ def globalize_physics_vars():
         "altitude", "cruise",
         "R0", "cp", "M", "L", "g", "rho0", "P0", "T0",
         "cd_body", "Cdbody",
-        "PA", "TA", "rhoA", "WingArea"
+        "PA", "TA", "rhoA", "WingArea", "I_roll", "Cdbody"
     ]
      
     for _name in _physics_vars:
@@ -156,7 +161,7 @@ def vertdrag_F(vy):
 def rotdrag_T(w): #LATEX
     #integral of F (prop to v^2) over the lever arm (increases linearly)
     average_lin_v = rad(w) * WingLength / 2  # average linear velocity of the wing
-    unitlengthdrag = 0.5 * rhoA * (average_lin_v) * 2 * WingArea
+    unitlengthdrag = 0.5 * rhoA * (average_lin_v)**2 * WingArea
     LeverLength = WingLength*WingLength / 2  # triangle: integral of length from 0 to WingLength
     return -unitlengthdrag * LeverLength
 

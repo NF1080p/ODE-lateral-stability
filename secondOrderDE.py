@@ -73,7 +73,7 @@ def second_order_DE_nonlinear_rk4_one_step(x, y, bank, dx, dy, dbank, dt):
         return dbank
     
     def f_ddbank(dx, dy, bank, dbank):
-        return (1/physics.I_roll) * physics.Tnet(dx, dy, bank, dbank) # inputs to Tnet are vss, vy, bank, w
+        return -(1/physics.I_roll) * physics.Tnet(dx, dy, bank, dbank) # inputs to Tnet are vss, vy, bank, w
 
     #rk4 !!!
 
