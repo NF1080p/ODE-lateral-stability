@@ -4,6 +4,7 @@ import math
 from secondOrderDE import second_order_DE_nonlinear
 from secondOrderDE import second_order_DE_nonlinear_rk4
 from secondOrderDE import second_order_DE_nonlinear_rk4_one_step
+from pathlib import Path
 from secondOrderDE import nick_test
 from datetime import datetime
 import numpy as np
@@ -44,7 +45,9 @@ class AircraftVisualizer(pyglet.window.Window):
         self.cam_y = pic_height
         
         # store flight data
-        self.data_path_name = "./data/" + "data-" + str(datetime.now()) + ".txt"
+
+        timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")  # remove problematic characters
+        self.data_path_name = Path("data") / f"data-{timestamp}.txt"
 
         # HUD labels
         self.label_pos = pyglet.text.Label('', x=10, y=WINDOW_HEIGHT-30)
