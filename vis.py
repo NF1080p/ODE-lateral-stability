@@ -4,7 +4,9 @@ import math
 from secondOrderDE import second_order_DE_nonlinear
 from secondOrderDE import second_order_DE_nonlinear_rk4
 from secondOrderDE import second_order_DE_nonlinear_rk4_one_step
+from pathlib import Path
 from secondOrderDE import nick_test
+from datetime import datetime
 import numpy as np
 import physics
 
@@ -41,19 +43,18 @@ class AircraftVisualizer(pyglet.window.Window):
         self.aircraft_x = pic_width/2
         self.aircraft_y = pic_height - WINDOW_HEIGHT/2
         self.aircraft_angle = 10.0  # degrees
-        self.aircraft_dx = 0.0
-        self.aircraft_dy = 0.0
-        self.aircraft_dangle = 0.0
+        self.aircraft_dx = 5.0
+        self.aircraft_dy = 10.0
+        self.aircraft_dangle = 10.0
 
         # Camera init pos (defining top-left corner)
         self.cam_x = pic_width/2 - WINDOW_WIDTH / 2
         self.cam_y = pic_height
         
-        # array to store solutions
-        self.x_sol_list = []
-        self.y_sol_list = []
-        self.bank_sol_list = []
-        self.t_list = []
+        # store flight data
+
+        timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")  # remove problematic characters
+        self.data_path_name = Path("data") / f"data-{timestamp}.txt"
 
         # HUD labels
         self.label_pos = pyglet.text.Label('', x=10, y=WINDOW_HEIGHT-30)
@@ -69,6 +70,7 @@ class AircraftVisualizer(pyglet.window.Window):
         self.background_img.anchor_x = 0
         self.background_img.anchor_y = 0
         self.runtime = 0.0
+
         
 
 
@@ -111,15 +113,8 @@ class AircraftVisualizer(pyglet.window.Window):
         self.aircraft_dy = self.dy1
         self.aircraft_dangle = self.dbank1
 
-        # push current x,y,angle positions to an array
-        self.x_sol_list.append(self.x1)
-        self.y_sol_list.append(self.y1)
-        self.bank_sol_list.append(self.bank1)
-        self.t_list.append(self.runtime)
-        # push to list because np.array slow at appending (?)
-        #print(self.sol_list)
-
-        with open("testing.txt", "a") as f:
+        # save position vs time data to txt file
+        with open(self.data_path_name, "a") as f:
             stringified = str(self.x1) + " " + str(self.y1) + " " + str(self.bank1) + " " + str(self.runtime) + "\n"
             f.write(stringified)
 

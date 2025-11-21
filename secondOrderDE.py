@@ -1,35 +1,5 @@
 import numpy as np
-import matplotlib.pyplot as plt
 import physics
-
-
-def second_order_DE(y0, yprime0, a, b, c, f_t, steps, endval):
-    """
-    Solves second order differential equation of form ay'' + by' + cy = f(t)
-    Args:
-        y0 (float): initial condition for y
-        yprime0 (float): initial condition for y'
-        a (float): coefficient of y''
-        b (float): coefficient of y'
-        c (float): coefficient of y
-        steps (int): number of time steps
-        endval (int): simulate upto t = endval
-    """
-    # generate t for plotting
-    t = np.linspace(0, endval, steps)
-    y = np.zeros(len(t))
-    dy = np.zeros(len(t))
-    y[0] = y0
-    dy[0] = yprime0 
-
-    for n in range(0, len(t)-1):
-        dt = t[n+1]-t[n] # we could play with variable time intervals
-        # euler's method: 
-        y[n+1] = y[n] + dy[n]*dt
-        dy[n+1] = dy[n] + (f_t[n]-b*dy[n]-c*y[n])*dt/a
-
-    return y
-
 
 def nick_test(x, y, bank, dx, dy, dbank, dt):
 
@@ -38,8 +8,6 @@ def nick_test(x, y, bank, dx, dy, dbank, dt):
     
     Fnetx = physics.Fnetx(dx, dy, bank)
     xa = (1/physics.Mass) * Fnetx # inputs to Fnetx are vss, vy, bank
-
-    
 
     ba = -(1/physics.I_roll) * physics.Tnet(dx, dy, bank, dbank) # inputs to Tnet are vss, vy, bank, w
 
@@ -54,7 +22,6 @@ def nick_test(x, y, bank, dx, dy, dbank, dt):
 
     
 def second_order_DE_nonlinear_rk4_one_step(x, y, bank, dx, dy, dbank, dt):
-
     # derivative functions to handle different inputs easy
     def f_dy(dy):
         return dy
@@ -134,9 +101,9 @@ def second_order_DE_nonlinear_rk4_one_step(x, y, bank, dx, dy, dbank, dt):
 
     return (x1, y1, bank1, dy1, dx1, dbank1)
 
-    
 def second_order_DE_nonlinear_rk4(y0, yprime0, x0, xprime0, bank0, bankprime0, steps, endval):
     """
+    DEPRECIATED CODE
     Euler's method to solve second order DE for lateral aircraft motion
     Args:
         y0 (float): initial condition for y
@@ -246,6 +213,7 @@ def second_order_DE_nonlinear_rk4(y0, yprime0, x0, xprime0, bank0, bankprime0, s
 
 def second_order_DE_nonlinear(y0, yprime0, x0, xprime0, bank0, bankprime0, steps, endval):
     """
+    DEPRECIATED CODE
     Euler's method to solve second order DE for lateral aircraft motion
     Args:
         y0 (float): initial condition for y
@@ -296,79 +264,30 @@ def second_order_DE_nonlinear(y0, yprime0, x0, xprime0, bank0, bankprime0, steps
 
     return (x, y, bank)
 
-    
-def second_order_RK_simple_case(y, yprime, steps, endval):
-    # https://lpsa.swarthmore.edu/NumInt/NumIntSecond.html
-    # https://lpsa.swarthmore.edu/NumInt/NumIntFourth.html
+def second_order_DE(y0, yprime0, a, b, c, f_t, steps, endval):
+    """
+    DEPRECIATED CODE
+    Solves second order differential equation of form ay'' + by' + cy = f(t)
+    Args:
+        y0 (float): initial condition for y
+        yprime0 (float): initial condition for y'
+        a (float): coefficient of y''
+        b (float): coefficient of y'
+        c (float): coefficient of y
+        steps (int): number of time steps
+        endval (int): simulate upto t = endval
+    """
+    # generate t for plotting
+    t = np.linspace(0, endval, steps)
+    y = np.zeros(len(t))
+    dy = np.zeros(len(t))
+    y[0] = y0
+    dy[0] = yprime0 
 
-    # helper function to help me learn lol
+    for n in range(0, len(t)-1):
+        dt = t[n+1]-t[n] # we could play with variable time intervals
+        # euler's method: 
+        y[n+1] = y[n] + dy[n]*dt
+        dy[n+1] = dy[n] + (f_t[n]-b*dy[n]-c*y[n])*dt/a
 
-    def func(t, x, v): # f(t,x,v) = mt + kx + lx'
-        m = 1
-        k = 1
-        l = 0.1
-        return -k*x-l*v
-    def rhs(t,x,v):
-        # might want to vary by a constant
-        return func(t,x,v)
-    def g(v):
-        return v # first order term
-    def testing(t,x,v,h):
-        k0 = h*g(v)
-        l0 = h*rhs(t,x,v)
-
-        k1 = h*g(v+0.5*l0)
-        l1 = h*rhs(t+0.5*h, x+0.5*k0, v+0.5*10)
-
-        k2 = h*g(v+0.5*l1)
-        l2 = h*rhs(t + 0.5*h, x+0.5*k1, v+0.5*l1)
-
-        k3 = h*g(v+l2)
-        l3 = h*rhs(t+0.5*h, x+0.5*k2, v+0.5*l2)
-
-        x_next = x+ (1/6)*(k0 + 2*k1 + 2*k2 + k3)
-        y_next = x+ (1/6)*(00 + 2*l1 + 2*l2 + l3)
-
-
-        return (x_next, y_next)
-
-def plot_solution(sol_list, t_list, title="a cool title"):
-    t = np.array(t_list)
-    sol_array = np.array(sol_list)
-    plt.plot(t, sol_list)
-    plt.title(title)
-    plt.show()
-    
-def plot_solution_from_file(filename="testing.txt"):
-    # get number of datapoints
-    datapoints = 0
-    x_list = []
-    y_list = []
-    bank_list = []
-    t_list = []
-    with open(filename, 'r') as file:
-        for line in file:
-            values = line.strip().split()
-            x_list.append(float(values[0]))
-            y_list.append(float(values[1]))
-            bank_list.append(float(values[2]))
-            t_list.append(float(values[3]))
-    plot_solution(x_list, t_list, "x vs t")
-    plot_solution(y_list, t_list, "y vs t")
-    plot_solution(bank_list, t_list, "bank vs t")
-    #print(x_list)
-
-if __name__ == "__main__":
-    # test case 
-    #y0 = 1; v0 = 0
-    #endval = 2*np.pi; steps = 100
-    #f_t = np.zeros(steps)
-    #output = second_order_DE(y0, v0, 1, 0, 1, f_t, steps, endval)
-    #plot_solution(output, steps, endval)
-    plot_solution_from_file()
-
-        # todo:
-        #  - implement a runga kutta algo 
-        #  - vectorize it so it works for linear systems
-
-
+    return y
