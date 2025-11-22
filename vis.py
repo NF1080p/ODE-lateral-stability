@@ -34,7 +34,10 @@ class AircraftVisualizer(pyglet.window.Window):
         # Initialize physics variables
         physics.globalize_physics_vars(dihedral=10, Mass=1000, WingLength=4, WingWidth=1, BodyArea=5,
                                        cLift_a0=0.25, cL_slope=0.2,
-                                       altitude=1000, cruise=52, I_roll=1000)
+                                       altitude=1000, cruise=52, I_roll=1000, drag_mult = 1)
+        
+        self.aircraft_angle = 5.0  # degrees
+        self.worldscale = 10.0  # zoom level
         
         # Aircraft init state
         # NOTE: COORDNIATES LOAD FROM BOTTOM LEFT
@@ -42,10 +45,12 @@ class AircraftVisualizer(pyglet.window.Window):
 
         self.aircraft_x = pic_width/2
         self.aircraft_y = pic_height - WINDOW_HEIGHT/2
-        self.aircraft_angle = 10.0  # degrees
-        self.aircraft_dx = 5.0
-        self.aircraft_dy = 10.0
-        self.aircraft_dangle = 10.0
+        self.initx = self.aircraft_x
+        self.inity = self.aircraft_y
+        
+        self.aircraft_dx = 0.0
+        self.aircraft_dy = 0.0
+        self.aircraft_dangle = 0.0
 
         # Camera init pos (defining top-left corner)
         self.cam_x = pic_width/2 - WINDOW_WIDTH / 2
@@ -81,6 +86,7 @@ class AircraftVisualizer(pyglet.window.Window):
         bottom_edge = self.cam_y + VIEWPORT_MARGIN
         top_edge = self.cam_y + WINDOW_HEIGHT - VIEWPORT_MARGIN
 
+        # NEED TO CHANGE THIS TO WORK WITH THE SCALE
         if self.aircraft_x < left_edge:
             self.cam_x = self.aircraft_x - VIEWPORT_MARGIN
         elif self.aircraft_x > right_edge:
@@ -150,10 +156,23 @@ class AircraftVisualizer(pyglet.window.Window):
         theta = math.radians(self.aircraft_angle)
         
         # define midpoint in relative coords
+        # all coords are from bottom left, so this finds the relative coordinates in terms of the camera
         px = self.aircraft_x - self.cam_x
         py = self.aircraft_y - self.cam_y
+
+        # set relative coords with respect to initial position
+        relativex = self.aircraft_x - self.initx
+        relativey = self.aircraft_y - self.inity
+
+        #scaled relative coords
+        srelativex = relativex * self.worldscale
+        srelativey = relativey * self.worldscale
+        
+        self.plot_coordx = -self.cam_x + self.initx + srelativex
+        self.plot_coordy = -self.cam_y + self.inity + srelativey
+
         # create shape with center at px, py
-        rectangle = shapes.Rectangle(px-wing/2, py-length/2, wing/2, length/2, color=(255, 22, 20), batch=aircraft)
+        rectangle = shapes.Rectangle(self.plot_coordx-wing/2, self.plot_coordy-length/2, wing/2, length/2, color=(255, 22, 20), batch=aircraft)
         # rotation
         rectangle.anchor_x = wing/4
         rectangle.anchor_y = length/4

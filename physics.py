@@ -9,6 +9,7 @@ I_roll = 1000 # moment of inertial about roll axis
 WingLength = 4 # half the wingspan
 WingWidth = 1 # chord length
 BodyArea = 5 # for Cfside, assume the body is roughly cylindrical so this acts for vertical drag and sideslip drag
+drag_mult = 1.0  # multiplier for drag forces
 
 a_default = 4 # angle of attack in deg
 cLift_a0 = 0.25  # lift coefficient NACA 2414
@@ -49,7 +50,7 @@ a_default = (Mass*g / (2* 0.5 * rhoA * cruise**2 * (WingArea/2) * math.cos(math.
 
 def globalize_physics_vars(dihedral=dihedral, WingLength=WingLength, WingWidth=WingWidth, BodyArea=BodyArea,
                             cLift_a0=cLift_a0, cL_slope=cL_slope, Mass=Mass,
-                            altitude=altitude, cruise=cruise, I_roll=I_roll):
+                            altitude=altitude, cruise=cruise, I_roll=I_roll, drag_mult=1.0):
      # Variables
     dihedral = dihedral # positive for dihedral, negative for anhedral
 
@@ -57,6 +58,7 @@ def globalize_physics_vars(dihedral=dihedral, WingLength=WingLength, WingWidth=W
     WingLength = WingLength # half the wingspan
     WingWidth = WingWidth # chord length
     BodyArea = BodyArea # for Cfside, assume the body is roughly cylindrical so this acts for vertical drag and sideslip drag
+    drag_mult = drag_mult  # multiplier for drag forces
 
     # a_default = a_default # angle of attack in deg
     cLift_a0 = cLift_a0  # lift coefficient NACA 2414
@@ -103,7 +105,7 @@ def globalize_physics_vars(dihedral=dihedral, WingLength=WingLength, WingWidth=W
         "altitude", "cruise",
         "R0", "cp", "M", "L", "g", "rho0", "P0", "T0",
         "cd_body", "Cdbody",
-        "PA", "TA", "rhoA", "WingArea", "I_roll", "Cdbody"
+        "PA", "TA", "rhoA", "WingArea", "I_roll", "Cdbody", "drag_mult"
     ]
      
     for _name in _physics_vars:
@@ -132,7 +134,7 @@ Clockwise torque is +
 (rolling right from our view, rolling left from pilot's view, reduces bank angle)
 
 Bank angle (bank) increases as the right (pilot's left) wing goes up and left wing goes down (our perspective). Opposite to torque direction.
-Logic being, when bank is negative, it slips in the negative direction (to the left from our POV)
+Logic being, when bank is positive, it slips in the negative direction (to the left from our POV)
 
 All forces are tuples (Fx, Fy)
 All torques are scalars
@@ -143,27 +145,31 @@ All torques are scalars
 def sidedrag_F(vss):
     if vss < 0:
         # slipping left, so drag to the right (+)
-        return (0.5 * rhoA * vss**2 * Cdbody, 0)
+        return (0.5 * rhoA * vss**2 * Cdbody * drag_mult, 0)
     else:
         # slipping right, so drag to the left (-)
-        return (-0.5 * rhoA * vss**2 * Cdbody, 0)
+        return (-0.5 * rhoA * vss**2 * Cdbody * drag_mult, 0)
 
 def vertdrag_F(vy):
     if vy < 0:
         # falling down, so drag up (+)
-        return (0, 0.5 * rhoA * vy**2 * Cdbody)
+        return (0, 0.5 * rhoA * vy**2 * Cdbody * drag_mult)
     else:
         # going up, so drag down (-)
-        return (0, -0.5 * rhoA * vy**2 * Cdbody)
+        return (0, -0.5 * rhoA * vy**2 * Cdbody * drag_mult)
 
 
 #Drag Torque
-def rotdrag_T(w): #LATEX
-    #integral of F (prop to v^2) over the lever arm (increases linearly)
-    average_lin_v = rad(w) * WingLength / 2  # average linear velocity of the wing
-    unitlengthdrag = 0.5 * rhoA * (average_lin_v)**2 * WingArea
-    LeverLength = WingLength*WingLength / 2  # triangle: integral of length from 0 to WingLength
-    return -unitlengthdrag * LeverLength
+# def rotdrag_T(w): #CHANGE TO AFFECT AOA
+#     #integral of F (prop to v^2) over the lever arm (increases linearly)
+#     average_lin_v = rad(w) * WingLength / 2  # average linear velocity of the wing
+#     unitlengthdrag = 0.5 * rhoA * (average_lin_v)**2 * WingArea
+#     LeverLength = WingLength*WingLength / 2  # triangle: integral of length from 0 to WingLength
+#     return -unitlengthdrag * LeverLength * drag_mult
+
+def rotv_speed_r_l(w):
+    average_lin_v = (rad(w) * WingLength / 2)*3
+    return (-average_lin_v, average_lin_v)  # right wing speed, left wing speed
 
 
 # Lift Forces
@@ -215,9 +221,11 @@ def side_slip_angle(vy, vss):
     # we dont really care about sideslip angle since we are breaking it up into vvert and vss
     return math.degrees(math.atan2(vy, vss))
 
-def AoAR(vss, vy, bank):
+def AoAR(vss, vy, bank, w):
     # take the component of airflow (-velocity) perpendicular to the right wing
     vsseff = -vss*math.sin(rad(bank-dihedral))
+    vy_rot = rotv_speed_r_l(w)[0]  # right wing rotational velocity
+    vy = vy + vy_rot
     vyeff = vy*math.cos(rad(bank-dihedral))
     
     # find total angle deviation from cruise deflecting in angle perpendicular to right wing
@@ -229,10 +237,12 @@ def AoAR(vss, vy, bank):
 
     return a_default - AoAadj
 
-def AoAL(vss, vy, bank):
+def AoAL(vss, vy, bank, w):
     # take the component of airflow (-velocity) perpendicular to the left wing
 
     vsseff = -vss*math.sin(rad(bank+dihedral))
+    vy_rot = rotv_speed_r_l(w)[1]  # left wing rotational velocity
+    vy = vy + vy_rot
     vyeff = vy*math.cos(rad(bank+dihedral))
     # find total angle deviation from cruise deflecting in angle perpendicular to left wing
     AoAadj = math.degrees(math.atan2(vyeff+vsseff, cruise))
@@ -246,41 +256,42 @@ def AoAL(vss, vy, bank):
 
 # Net Force and Torques
 
-def Fnety (vss, vy, bank):
+def Fnety (vss, vy, bank, w):
     weight = weight_F()[1]
     vertdrag = vertdrag_F(vy)[1]
-    leftlift = leftlift_F(bank, AoAL(vss, vy, bank))[1]
-    rightlift = rightlift_F(bank, AoAR(vss, vy, bank))[1]
+    leftlift = leftlift_F(bank, AoAL(vss, vy, bank, w))[1]
+    rightlift = rightlift_F(bank, AoAR(vss, vy, bank, w))[1]
 
     return weight + leftlift + rightlift + vertdrag
 
-def Fnetx (vss, vy, bank):
+def Fnetx (vss, vy, bank, w):
     sidedrag = sidedrag_F(vss)[0]
-    leftlift = leftlift_F(bank, AoAL(vss, vy, bank))[0]
-    rightlift = rightlift_F(bank, AoAR(vss, vy, bank))[0]
+    leftlift = leftlift_F(bank, AoAL(vss, vy, bank, w))[0]
+    rightlift = rightlift_F(bank, AoAR(vss, vy, bank, w))[0]
 
     return sidedrag + leftlift + rightlift
 
 def Tnet (vss, vy, bank, w):
-    left_T = leftlift_T(leftlift_F(bank, AoAL(vss, vy, bank)))
-    right_T = rightlift_T(rightlift_F(bank, AoAR(vss, vy, bank)))
-    rot_T = rotdrag_T(w)
-    return left_T + right_T + rot_T
+    left_T = leftlift_T(leftlift_F(bank, AoAL(vss, vy, bank, w)))
+    right_T = rightlift_T(rightlift_F(bank, AoAR(vss, vy, bank, w)))
+    return left_T + right_T
 
 
 if __name__ == "__main__":
-    globalize_physics_vars()
+    globalize_physics_vars(dihedral=0, Mass=1000, WingLength=4, WingWidth=1, BodyArea=5,
+                                       cLift_a0=0.25, cL_slope=0.2,
+                                       altitude=1000, cruise=52, I_roll=1000)
 
     # simple test
-    bank = 180  # degrees counter clockwise    _o/
+    bank = 15  # degrees counter clockwise    _o/
     vy = 0  # m/s down
-    vss = +2 # m/s slipping 
+    vss = 0 # m/s slipping 
     w = 5  # deg/s
     print("a_default" + ": ", a_default)
     
     #    _o/    slipping <- and falling v
-    print("AoAR:", AoAR(vss,vy,bank))
-    print("AoAL:", AoAL(vss,vy,bank))
-    print("Fnetx:", Fnetx(vss, vy, bank))
-    print("Fnety:", Fnety(vss, vy, bank))
+    print("AoAR:", AoAR(vss,vy,bank, w))
+    print("AoAL:", AoAL(vss,vy,bank, w))
+    print("Fnetx:", Fnetx(vss, vy, bank, w))
+    print("Fnety:", Fnety(vss, vy, bank, w))
     print("Tnet:", Tnet(vss, vy, bank, w))

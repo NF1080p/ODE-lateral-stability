@@ -26,14 +26,14 @@ def second_order_DE_nonlinear_rk4_one_step(x, y, bank, dx, dy, dbank, dt):
     def f_dy(dy):
         return dy
     def f_ddy(dy, bank):
-        Fnety = physics.Fnety(dx, dy, bank)
+        Fnety = physics.Fnety(dx, dy, bank, dbank)
         return (1/physics.Mass) * Fnety
     
     def f_dx(dx):
         return dx 
     
     def f_ddx(dx, dy, bank):
-        Fnetx = physics.Fnetx(dx, dy, bank)
+        Fnetx = physics.Fnetx(dx, dy, bank, dbank)
         return (1/physics.Mass) * Fnetx # inputs to Fnetx are vss, vy, bank
     
     def f_dbank(dbank):
@@ -99,7 +99,8 @@ def second_order_DE_nonlinear_rk4_one_step(x, y, bank, dx, dy, dbank, dt):
     bank1 = bank + (k1_bank + 2*k2_bank + 2*k3_bank + k4_bank) / 6
     dbank1 = dbank + (k1_dbank + 2*k2_dbank + 2*k3_dbank + k4_dbank) / 6
 
-    return (x1, y1, bank1, dy1, dx1, dbank1)
+    #print(f"dy1: {dy1}, dx1: {dx1}, dbank1: {dbank1}")
+    return (x1, y1, bank1, dx1, dy1, dbank1)
 
 def second_order_DE_nonlinear_rk4(y0, yprime0, x0, xprime0, bank0, bankprime0, steps, endval):
     """
