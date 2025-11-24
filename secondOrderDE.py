@@ -1,5 +1,7 @@
 import numpy as np
 import physics
+import keyboardctrl as kb
+
 
 def nick_test(x, y, bank, dx, dy, dbank, dt):
 
@@ -40,8 +42,26 @@ def second_order_DE_nonlinear_rk4_one_step(x, y, bank, dx, dy, dbank, dt):
         return dbank
     
     def f_ddbank(dx, dy, bank, dbank):
-        return -(1/physics.I_roll) * physics.Tnet(dx, dy, bank, dbank) # inputs to Tnet are vss, vy, bank, w
+        return -(1/physics.I_roll) * inject_aileron_control(dx, dy, bank, dbank) # inputs to Tnet are vss, vy, bank, w
 
+    def inject_aileron_control(dx, dy, bank, dbank):
+        T_natural = physics.Tnet(dx, dy, bank, dbank)
+
+        ap(kb.ap_on)
+
+        T_input = kb.aileron_input * -300
+        print(T_natural, T_input)
+        return T_natural + T_input
+    
+    def ap(ap_on):
+        if ap_on:
+            if (bank < -0.01 and kb.aileron_input < 30) or (bank > 0.01 and kb.aileron_input > -30):
+                kb.aileron_input -= bank/5 + dbank/2
+            else:
+                kb.aileron_input = 0
+
+
+    
     #rk4 !!!
 
     # y substeps
