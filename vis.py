@@ -1,14 +1,13 @@
 import pyglet
 from pyglet import shapes
 import math
-from secondOrderDE import second_order_DE_nonlinear
-from secondOrderDE import second_order_DE_nonlinear_rk4
 from secondOrderDE import second_order_DE_nonlinear_rk4_one_step
 from pathlib import Path
-from secondOrderDE import nick_test
 from datetime import datetime
 import numpy as np
 import physics
+import keyboardctrl
+
 
 # --- Constants ---
 WINDOW_WIDTH = 1000
@@ -37,7 +36,7 @@ class AircraftVisualizer(pyglet.window.Window):
                                        altitude=1000, cruise=52, I_roll=1000, drag_mult = 1)
         
         self.aircraft_angle = 5.0  # degrees
-        self.worldscale = 10.0  # zoom level
+        self.worldscale = 1  # zoom level
         
         # Aircraft init state
         # NOTE: COORDNIATES LOAD FROM BOTTOM LEFT
@@ -64,6 +63,7 @@ class AircraftVisualizer(pyglet.window.Window):
         # HUD labels
         self.label_pos = pyglet.text.Label('', x=10, y=WINDOW_HEIGHT-30)
         self.label_pitch = pyglet.text.Label('', x=10, y=WINDOW_HEIGHT-60)
+        self.autopilot_status = pyglet.text.Label('', x=10, y=WINDOW_HEIGHT-90)
 
 
         
@@ -130,6 +130,8 @@ class AircraftVisualizer(pyglet.window.Window):
         # Update HUD text
         self.label_pos.text = f"Aircraft Pos: ({self.aircraft_x:.1f}, {self.aircraft_y:.1f})"
         self.label_pitch.text = f"Bank: {self.aircraft_angle:.1f}°"
+        #self.autopilot_status.text = f"Autopilot status: {keyboardctrl.ap_on:.1f}°"
+
 
     def on_draw(self):
         self.clear()
