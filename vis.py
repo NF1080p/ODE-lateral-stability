@@ -11,8 +11,7 @@ import keyboardctrl
 
 # --- Constants ---
 WINDOW_WIDTH = 1000
-WINDOW_HEIGHT = 700
-VIEWPORT_MARGIN = 100  # pixels from edge before camera moves
+WINDOW_HEIGHT = 700  # pixels from edge before camera moves
 
 NUM_OF_FRAMES = 60
 SIM_TIME = 20 
@@ -31,12 +30,12 @@ class AircraftVisualizer(pyglet.window.Window):
         
 
         # Initialize physics variables
-        physics.globalize_physics_vars(dihedral=10, Mass=1000, WingLength=4, WingWidth=1, BodyArea=5,
+        physics.globalize_physics_vars(dihedral=0, Mass=1000, WingLength=4, WingWidth=1, BodyArea=5,
                                        cLift_a0=0.25, cL_slope=0.2,
                                        altitude=1000, cruise=52, I_roll=1000, drag_mult = 1)
         
-        self.aircraft_angle = 5.0  # degrees
-        self.worldscale = 1  # zoom level
+        self.aircraft_angle = 20.0  # degrees
+        self.worldscale = 10  # zoom level
         
         # Aircraft init state
         # NOTE: COORDNIATES LOAD FROM BOTTOM LEFT
@@ -54,6 +53,7 @@ class AircraftVisualizer(pyglet.window.Window):
         # Camera init pos (defining top-left corner)
         self.cam_x = pic_width/2 - WINDOW_WIDTH / 2
         self.cam_y = pic_height
+        print(f"Initial camera position: ({self.cam_x}, {self.cam_y})")
         
         # store flight data
 
@@ -75,27 +75,40 @@ class AircraftVisualizer(pyglet.window.Window):
         self.background_img.anchor_x = 0
         self.background_img.anchor_y = 0
         self.runtime = 0.0
+        
+        # Camera variables
+        self.VIEWPORT_MARGIN = 200  # pixels from edge before camera moves
+
+        # load init plot coords
+        self.plot_coordy = self.aircraft_y - self.cam_x # not right coody is a relative aircraft is a global
+        self.plot_coordx = self.aircraft_x  - self.cam_y
+        self.scaled_aircraft_x = self.plot_coordx + self.cam_x
+        self.scaled_aircraft_y = self.plot_coordy + self.cam_y
+        print("\nRunning  .  .  . \n")
 
         
 
 
     def camera(self):
         # Camera
-        left_edge = self.cam_x + VIEWPORT_MARGIN
-        right_edge = self.cam_x + WINDOW_WIDTH - VIEWPORT_MARGIN
-        bottom_edge = self.cam_y + VIEWPORT_MARGIN
-        top_edge = self.cam_y + WINDOW_HEIGHT - VIEWPORT_MARGIN
+        left_edge = self.cam_x + self.VIEWPORT_MARGIN
+        right_edge = self.cam_x + WINDOW_WIDTH - self.VIEWPORT_MARGIN
+        bottom_edge = self.cam_y + self.VIEWPORT_MARGIN
+        top_edge = self.cam_y + WINDOW_HEIGHT - self.VIEWPORT_MARGIN
 
-        # NEED TO CHANGE THIS TO WORK WITH THE SCALE
-        if self.aircraft_x < left_edge:
-            self.cam_x = self.aircraft_x - VIEWPORT_MARGIN
-        elif self.aircraft_x > right_edge:
-            self.cam_x = self.aircraft_x - WINDOW_WIDTH + VIEWPORT_MARGIN
 
-        if self.aircraft_y < bottom_edge:
-            self.cam_y = self.aircraft_y - VIEWPORT_MARGIN
-        elif self.aircraft_y > top_edge:
-            self.cam_y = self.aircraft_y - WINDOW_HEIGHT + VIEWPORT_MARGIN
+        #print(f"Aircraft position: ({self.scaled_aircraft_x}, {self.scaled_aircraft_y})")
+
+        if (self.scaled_aircraft_x) < left_edge:
+            self.cam_x = self.scaled_aircraft_x - self.VIEWPORT_MARGIN
+        elif self.scaled_aircraft_x > right_edge:
+            self.cam_x = self.scaled_aircraft_x - WINDOW_WIDTH + self.VIEWPORT_MARGIN
+
+        if self.scaled_aircraft_y < bottom_edge:
+            self.cam_y = self.scaled_aircraft_y - self.VIEWPORT_MARGIN
+        elif self.scaled_aircraft_y > top_edge:
+            self.cam_y = self.scaled_aircraft_y - WINDOW_HEIGHT + self.VIEWPORT_MARGIN
+        #print(f"Updated camera position: ({self.cam_x}, {self.cam_y})")
 
         # Clamp camera to world
         return (max(0, min(self.cam_x, pic_width - WINDOW_WIDTH)), max(0, min(self.cam_y, pic_height - WINDOW_HEIGHT)))
@@ -119,6 +132,17 @@ class AircraftVisualizer(pyglet.window.Window):
         self.aircraft_dy = self.dy1
         self.aircraft_dangle = self.dbank1
 
+        # Check failure conditions
+        self.scaled_aircraft_x = self.plot_coordx + self.cam_x
+        self.scaled_aircraft_y = self.plot_coordy + self.cam_y
+
+        if (self.scaled_aircraft_y < 0) or (self.scaled_aircraft_y > pic_height) or (self.scaled_aircraft_x < 0) or (self.scaled_aircraft_x > pic_width):
+            print("Aircraft has left the world boundaries. Simulation ending.")
+            pyglet.app.exit()
+        elif (self.aircraft_angle < -90) or (self.aircraft_angle > 90):
+            print("Aircraft has exceeded safe bank angle. Simulation ending.")
+            pyglet.app.exit()
+
         # save position vs time data to txt file
         with open(self.data_path_name, "a") as f:
             stringified = str(self.x1) + " " + str(self.y1) + " " + str(self.bank1) + " " + str(self.runtime) + "\n"
@@ -128,7 +152,7 @@ class AircraftVisualizer(pyglet.window.Window):
         self.cam_x, self.cam_y = self.camera()
         
         # Update HUD text
-        self.label_pos.text = f"Aircraft Pos: ({self.aircraft_x:.1f}, {self.aircraft_y:.1f})"
+        self.label_pos.text = f"Aircraft init pos: ({self.aircraft_x:.1f}, {self.aircraft_y:.1f})"
         self.label_pitch.text = f"Bank: {self.aircraft_angle:.1f}°"
         #self.autopilot_status.text = f"Autopilot status: {keyboardctrl.ap_on:.1f}°"
 
@@ -163,12 +187,12 @@ class AircraftVisualizer(pyglet.window.Window):
         py = self.aircraft_y - self.cam_y
 
         # set relative coords with respect to initial position
-        relativex = self.aircraft_x - self.initx
-        relativey = self.aircraft_y - self.inity
+        self.relativex = self.aircraft_x - self.initx
+        self.relativey = self.aircraft_y - self.inity
 
         #scaled relative coords
-        srelativex = relativex * self.worldscale
-        srelativey = relativey * self.worldscale
+        srelativex = self.relativex * self.worldscale
+        srelativey = self.relativey * self.worldscale
         
         self.plot_coordx = -self.cam_x + self.initx + srelativex
         self.plot_coordy = -self.cam_y + self.inity + srelativey

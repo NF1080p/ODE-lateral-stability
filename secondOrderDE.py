@@ -50,7 +50,8 @@ def second_order_DE_nonlinear_rk4_one_step(x, y, bank, dx, dy, dbank, dt):
         ap(kb.ap_on)
 
         T_input = kb.aileron_input * -300
-        print(T_natural, T_input)
+        # ENABLE TO VIEW AUTOPILOT INPUTS
+        #print(T_natural, T_input)
         return T_natural + T_input
     
     def ap(ap_on):
