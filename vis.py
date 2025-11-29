@@ -30,7 +30,7 @@ class AircraftVisualizer(pyglet.window.Window):
         
 
         # Initialize physics variables
-        physics.globalize_physics_vars(dihedral=0, Mass=1000, WingLength=4, WingWidth=1, BodyArea=5,
+        physics.globalize_physics_vars(dihedral=5, Mass=1000, WingLength=4, WingWidth=1, BodyArea=5,
                                        cLift_a0=0.25, cL_slope=0.2,
                                        altitude=1000, cruise=52, I_roll=1000, drag_mult = 1)
         

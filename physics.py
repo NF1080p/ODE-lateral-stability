@@ -180,9 +180,9 @@ def leftlift_F(bank, AoA=a_default):
     cLift = cLift_a0 + cL_slope * AoA
     TotalLiftLeft = 0.5 * rhoA * v**2 * cLift * (WingArea/2)
 
-    LiftY = TotalLiftLeft * math.cos(rad(dihedral)+rad(bank))
-    # negative since with high anhedral or positive bank, the lift points left (-)
-    LiftX = -TotalLiftLeft * math.sin(rad(dihedral)+rad(bank))
+    LiftY = TotalLiftLeft * math.cos(rad(bank)+rad(dihedral))
+    # negative since with positive dihedral or positive bank, the lift points left (-)
+    LiftX = -TotalLiftLeft * math.sin(rad(bank)+rad(dihedral))
 
     return (LiftX, LiftY)
 
@@ -192,9 +192,9 @@ def rightlift_F(bank, AoA=a_default):
     cLift = cLift_a0 + cL_slope * AoA
     TotalLiftRight = 0.5 * rhoA * v**2 * cLift * (WingArea/2)
 
-    LiftY = TotalLiftRight * math.cos(rad(dihedral)-rad(bank))
-    # positive since with high dihedral or negative bank, the lift points right (+)
-    LiftX = TotalLiftRight * math.sin(rad(dihedral)-rad(bank))
+    LiftY = TotalLiftRight * math.cos(rad(bank)-rad(dihedral))
+    # negative since with high dihedral or positive bank, the lift points left (-)
+    LiftX = -TotalLiftRight * math.sin(rad(bank)-rad(dihedral))
 
     return (LiftX, LiftY)
 
