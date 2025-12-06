@@ -48,7 +48,7 @@ Our code is written in Python3. To reproduce our results, start by installing th
 
 1. Clone this repository
 2. Create and activate virtual environment in Python
-3. Install the dependencies by running `pip install -r requirements.txt` in your terminal
+3. Install the dependendencies: `pip install pyglet numpy pynput matplotlib sympy`
 
 To run the sim, run `python vis.py` in your terminal. A GUI will pop up showing the aircraft motion. Close the sim by closing the GUI. This generates a file called `data-SIM_START_DATE_AND_TIME.txt` in the folder `./data/`. This file is formatted as:
 
