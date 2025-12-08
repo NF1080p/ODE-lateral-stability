@@ -14,18 +14,7 @@ import physics
 #### Nick has to implement his changes from his backup --> making the init more user friendly and fixing up the old comments
 # make planes scaleable with worldscale
 
-# --- Constants ---
-WINDOW_WIDTH = 1000
-WINDOW_HEIGHT = 700
-VIEWPORT_MARGIN = 100  # pixels from edge before camera moves
 
-NUM_OF_FRAMES = 60
-SIM_TIME = 20 
-# Background image
-# https://unsplash.com/photos/sky-cloud-blue-background-paronama-web-cloudy-summer-winter-season-day-light-beauty-horizon-spring-brigth-gradient-calm-abstract-backdrop-air-nature-view-wallpaper-landscape-cyan-color-environment-wkVWKgeyEEs
-# 3000x1097
-pic_width = 3000
-pic_height = 1097
 
 # --- Aircraft Visualizer ---
 class AircraftVisualizer(pyglet.window.Window):
@@ -38,6 +27,27 @@ class AircraftVisualizer(pyglet.window.Window):
         self.aircraft_angle = 5.0  # degrees
         self.worldscale = 10.0  # zoom level
         
+
+        # --- Constants ---
+        global WINDOW_WIDTH
+        global WINDOW_HEIGHT
+        WINDOW_WIDTH = 1000
+        WINDOW_HEIGHT = 700
+        self.VIEWPORT_MARGIN = 100  # pixels from edge before camera moves
+
+        global NUM_OF_FRAMES
+        global SIM_TIME
+        NUM_OF_FRAMES = 60
+        SIM_TIME = 20 
+        # Background image
+        # https://unsplash.com/photos/sky-cloud-blue-background-paronama-web-cloudy-summer-winter-season-day-light-beauty-horizon-spring-brigth-gradient-calm-abstract-backdrop-air-nature-view-wallpaper-landscape-cyan-color-environment-wkVWKgeyEEs
+        # 3000x1097
+        global pic_width
+        global pic_height
+        pic_width = 3000
+        pic_height = 1097
+
+
         # Aircraft init state
         # NOTE: COORDNIATES LOAD FROM BOTTOM LEFT
         # (0,0) is bottom-left of background image
@@ -98,26 +108,34 @@ class AircraftVisualizer(pyglet.window.Window):
         self.background_img.anchor_y = 0
         self.runtime = 0.0
 
+
+        # load init plot coords
+        self.plot_coordy = self.aircraft_y - self.cam_x # not right coody is a relative aircraft is a global
+        self.plot_coordx = self.aircraft_x  - self.cam_y
+        self.scaled_aircraft_x = self.plot_coordx + self.cam_x
+        self.scaled_aircraft_y = self.plot_coordy + self.cam_y
+        print("\nRunning  .  .  . \n")
+
         
 
 
     def camera(self):
-        # Camera
-        left_edge = self.cam_x + VIEWPORT_MARGIN
-        right_edge = self.cam_x + WINDOW_WIDTH - VIEWPORT_MARGIN
-        bottom_edge = self.cam_y + VIEWPORT_MARGIN
-        top_edge = self.cam_y + WINDOW_HEIGHT - VIEWPORT_MARGIN
+        # Camera 
+        left_edge = self.cam_x + self.VIEWPORT_MARGIN
+        right_edge = self.cam_x + WINDOW_WIDTH - self.VIEWPORT_MARGIN
+        bottom_edge = self.cam_y + self.VIEWPORT_MARGIN
+        top_edge = self.cam_y + WINDOW_HEIGHT - self.VIEWPORT_MARGIN
 
-        # NEED TO CHANGE THIS TO WORK WITH THE SCALE
-        if self.aircraft_x < left_edge:
-            self.cam_x = self.aircraft_x - VIEWPORT_MARGIN
-        elif self.aircraft_x > right_edge:
-            self.cam_x = self.aircraft_x - WINDOW_WIDTH + VIEWPORT_MARGIN
 
-        if self.aircraft_y < bottom_edge:
-            self.cam_y = self.aircraft_y - VIEWPORT_MARGIN
-        elif self.aircraft_y > top_edge:
-            self.cam_y = self.aircraft_y - WINDOW_HEIGHT + VIEWPORT_MARGIN
+        if (self.scaled_aircraft_x) < left_edge:
+            self.cam_x = self.scaled_aircraft_x - self.VIEWPORT_MARGIN
+        elif self.scaled_aircraft_x > right_edge:
+            self.cam_x = self.scaled_aircraft_x - WINDOW_WIDTH + self.VIEWPORT_MARGIN
+
+        if self.scaled_aircraft_y < bottom_edge:
+            self.cam_y = self.scaled_aircraft_y - self.VIEWPORT_MARGIN
+        elif self.scaled_aircraft_y > top_edge:
+            self.cam_y = self.scaled_aircraft_y - WINDOW_HEIGHT + self.VIEWPORT_MARGIN
 
         # Clamp camera to world
         return (max(0, min(self.cam_x, pic_width - WINDOW_WIDTH)), max(0, min(self.cam_y, pic_height - WINDOW_HEIGHT)))
@@ -125,13 +143,12 @@ class AircraftVisualizer(pyglet.window.Window):
     def update(self, dt):
         self.runtime += dt
         
-        # calculate new aircraft properties from previous
+        # --- Calculate new aircraft properties from previous using RK 4 solver ---
         self.x1, self.y1, self.bank1, self.dx1, self.dy1, self.dbank1 = second_order_DE_nonlinear_rk4_one_step(self.aircraft_x, self.aircraft_y, self.aircraft_angle, 
                                                                                                                self.aircraft_dx, self.aircraft_dy, self.aircraft_dangle, 
                                                                                                                1/NUM_OF_FRAMES)
 
-        #print(f"Time: {self.runtime:.2f}s, Pos: ({self.x1:.2f}, {self.y1:.2f}), Angle: {self.bank1:.2f}°, Vel: ({self.dx1:.2f}, {self.dy1:.2f}), Angular Vel: {self.dbank1:.2f}°/s")
-       
+        # Update positions       
         self.aircraft_x = self.x1
         self.aircraft_y = self.y1
         self.aircraft_angle = self.bank1
@@ -141,7 +158,18 @@ class AircraftVisualizer(pyglet.window.Window):
         self.aircraft_dy = self.dy1
         self.aircraft_dangle = self.dbank1
 
-        # save position vs time data to txt file
+        # Check failure conditions
+        self.scaled_aircraft_x = self.plot_coordx + self.cam_x
+        self.scaled_aircraft_y = self.plot_coordy + self.cam_y
+
+        if (self.scaled_aircraft_y < 0) or (self.scaled_aircraft_y > pic_height) or (self.scaled_aircraft_x < 0) or (self.scaled_aircraft_x > pic_width):
+            print("Aircraft has left the world boundaries. Simulation ending.")
+            pyglet.app.exit()
+        elif (self.aircraft_angle < -90) or (self.aircraft_angle > 90):
+            print("Aircraft has exceeded safe bank angle. Simulation ending.")
+            pyglet.app.exit()
+
+        # Save position vs time data to txt file
         with open(self.data_path_name, "a") as f:
             stringified = str(self.x1) + " " + str(self.y1) + " " + str(self.bank1) + " " + str(self.runtime) + "\n"
             f.write(stringified)
@@ -150,8 +178,9 @@ class AircraftVisualizer(pyglet.window.Window):
         self.cam_x, self.cam_y = self.camera()
         
         # Update HUD text
-        self.label_pos.text = f"Aircraft Pos: ({self.aircraft_x:.1f}, {self.aircraft_y:.1f})"
+        self.label_pos.text = f"Aircraft init pos: ({self.aircraft_x:.1f}, {self.aircraft_y:.1f})"
         self.label_pitch.text = f"Bank: {self.aircraft_angle:.1f}°"
+
 
     def on_draw(self):
         self.clear()
@@ -183,23 +212,17 @@ class AircraftVisualizer(pyglet.window.Window):
         py = self.aircraft_y - self.cam_y
 
         # set relative coords with respect to initial position
-        relativex = self.aircraft_x - self.initx
-        relativey = self.aircraft_y - self.inity
+        self.relativex = self.aircraft_x - self.initx
+        self.relativey = self.aircraft_y - self.inity
 
         #scaled relative coords
-        srelativex = relativex * self.worldscale
-        srelativey = relativey * self.worldscale
+        srelativex = self.relativex * self.worldscale
+        srelativey = self.relativey * self.worldscale
         
         self.plot_coordx = -self.cam_x + self.initx + srelativex
         self.plot_coordy = -self.cam_y + self.inity + srelativey
 
-        # create shape with center at px, py
 
-        
-
-
-        #rectangle = shapes.Rectangle(self.plot_coordx-wing/2, self.plot_coordy-length/2, wing/2, length/2, color=(255, 22, 20), batch=aircraft)
-        # rotation
         #self.aircraft_sprite.anchor_x = wing/4
         #self.aircraft_sprite.anchor_y = length/4
         # must be negative to agree with convention. rolling right is positive bank angle for pilot's view, angle is between the (pilots) left wing and the horizontal
