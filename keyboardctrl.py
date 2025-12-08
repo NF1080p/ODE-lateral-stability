@@ -3,11 +3,11 @@ import threading
 
 
 aileron_input = 0
-pitch_input = 0
+
 ap_on = 0
 
 def on_press(key, injected):
-    global aileron_input, pitch_input, ap_on
+    global aileron_input, ap_on
     try:
         if key.char == 'p':
             ap_on = 1 - ap_on
@@ -15,17 +15,13 @@ def on_press(key, injected):
         if ap_on == 0:
             if key.char == 'a':
                 if aileron_input < 30:
-                    aileron_input += .5
+                    aileron_input += 2
 
             elif key.char == 'd':
                 if aileron_input > -30:
-                    aileron_input -= .5
+                    aileron_input -= 2
 
-            elif key.char == 'w':
-                pitch_input += .5
 
-            elif key.char == 's':
-                pitch_input -= .5
 
 
 
@@ -53,4 +49,4 @@ listener = keyboard.Listener(
     on_press=on_press,
     on_release=on_release)
 listener.start()
-print("keyboard active")
+print("kb active")

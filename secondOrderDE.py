@@ -50,14 +50,13 @@ def second_order_DE_nonlinear_rk4_one_step(x, y, bank, dx, dy, dbank, dt):
         ap(kb.ap_on)
 
         T_input = kb.aileron_input * -300
-        # ENABLE TO VIEW AUTOPILOT INPUTS
-        #print(T_natural, T_input)
+        print(T_natural, T_input)
         return T_natural + T_input
     
     def ap(ap_on):
         if ap_on:
             if (bank < -0.01 and kb.aileron_input < 30) or (bank > 0.01 and kb.aileron_input > -30):
-                kb.aileron_input -= bank/5 + dbank/2
+                kb.aileron_input -= bank/5 + dbank/3
             else:
                 kb.aileron_input = 0
 
