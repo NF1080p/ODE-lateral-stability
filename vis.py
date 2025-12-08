@@ -26,10 +26,19 @@ pic_height = 1097
 # --- Aircraft Visualizer ---
 class AircraftVisualizer(pyglet.window.Window):
     def __init__(self):
+
+        initial_dihedral = -3
+        if initial_dihedral < 0:
+            sprite_file = "mirage.png"
+        elif initial_dihedral > 0:
+            sprite_file = "777.png"
+        else:
+            sprite_file = "su27.png"
+
         super().__init__(WINDOW_WIDTH, WINDOW_HEIGHT, "Aircraft Visualizer - Pyglet 2.x")
         pyglet.gl.glClearColor(0.53, 0.81, 0.98, 1.0)  # Sky blue background
 
-        self.aircraft_image = pyglet.image.load("777.png")
+        self.aircraft_image = pyglet.image.load(sprite_file)
         self.aircraft_image.anchor_x = self.aircraft_image.width // 2
         self.aircraft_image.anchor_y = self.aircraft_image.height // 2
         self.aircraft_sprite = pyglet.sprite.Sprite(
@@ -39,7 +48,7 @@ class AircraftVisualizer(pyglet.window.Window):
         )
 
         # Initialize physics variables
-        physics.globalize_physics_vars(dihedral=6, Mass=1000, WingLength=4, WingWidth=1, BodyArea=5,
+        physics.globalize_physics_vars(dihedral=initial_dihedral, Mass=1000, WingLength=4, WingWidth=1, BodyArea=5,
                                        cLift_a0=0.25, cL_slope=0.2,
                                        altitude=1000, cruise=52, I_roll=1000, drag_mult = 1)
         
