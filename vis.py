@@ -10,6 +10,10 @@ from datetime import datetime
 import numpy as np
 import physics
 
+
+#### Nick has to implement his changes from his backup --> making the init more user friendly and fixing up the old comments
+# make planes scaleable with worldscale
+
 # --- Constants ---
 WINDOW_WIDTH = 1000
 WINDOW_HEIGHT = 700
@@ -26,11 +30,32 @@ pic_height = 1097
 # --- Aircraft Visualizer ---
 class AircraftVisualizer(pyglet.window.Window):
     def __init__(self):
+        # Initialize physics variables
+        physics.globalize_physics_vars(dihedral=-3, Mass=1000, WingLength=4, WingWidth=1, BodyArea=5,
+                                       cLift_a0=0.25, cL_slope=0.2,
+                                       altitude=1000, cruise=52, I_roll=1000, drag_mult = 1)
+        
+        self.aircraft_angle = 5.0  # degrees
+        self.worldscale = 10.0  # zoom level
+        
+        # Aircraft init state
+        # NOTE: COORDNIATES LOAD FROM BOTTOM LEFT
+        # (0,0) is bottom-left of background image
 
-        initial_dihedral = -3
-        if initial_dihedral < 0:
+        self.aircraft_x = pic_width/2
+        self.aircraft_y = pic_height - WINDOW_HEIGHT/2
+        self.initx = self.aircraft_x
+        self.inity = self.aircraft_y
+        
+        self.aircraft_dx = 0.0
+        self.aircraft_dy = 0.0
+        self.aircraft_dangle = 0.0
+
+
+        # Load aircraft sprite
+        if physics.dihedral < 0:
             sprite_file = "mirage.png"
-        elif initial_dihedral > 0:
+        elif physics.dihedral > 0:
             sprite_file = "777.png"
         else:
             sprite_file = "su27.png"
@@ -46,27 +71,8 @@ class AircraftVisualizer(pyglet.window.Window):
             x=0,
             y=0
         )
+        self.aircraft_sprite.scale = self.worldscale / 20  # Scale down the aircraft sprite
 
-        # Initialize physics variables
-        physics.globalize_physics_vars(dihedral=initial_dihedral, Mass=1000, WingLength=4, WingWidth=1, BodyArea=5,
-                                       cLift_a0=0.25, cL_slope=0.2,
-                                       altitude=1000, cruise=52, I_roll=1000, drag_mult = 1)
-        
-        self.aircraft_angle = 5.0  # degrees
-        self.worldscale = 1.0  # zoom level
-        
-        # Aircraft init state
-        # NOTE: COORDNIATES LOAD FROM BOTTOM LEFT
-        # (0,0) is bottom-left of background image
-
-        self.aircraft_x = pic_width/2
-        self.aircraft_y = pic_height - WINDOW_HEIGHT/2
-        self.initx = self.aircraft_x
-        self.inity = self.aircraft_y
-        
-        self.aircraft_dx = 0.0
-        self.aircraft_dy = 0.0
-        self.aircraft_dangle = 0.0
 
         # Camera init pos (defining top-left corner)
         self.cam_x = pic_width/2 - WINDOW_WIDTH / 2
