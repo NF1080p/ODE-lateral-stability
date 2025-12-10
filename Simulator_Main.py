@@ -14,6 +14,9 @@ class AircraftVisualizer(pyglet.window.Window):
          # --- USER INPUTS GO HERE ---
         ''' Physics parameters '''
         # dihedral: positive is dihedral angle, negative is anhedral angle, 0 is flat wing
+            # try dihedral = -2 for a small anhedral angle typical of many aircraft
+            # try dihedral = 5 for a moderate dihedral angle typical of many general aviation aircraft
+            # try dihedral = 0 for flat wing like many fighter jets
         # Mass: kg of aircraft (1000 is default)
         # WingLength: length of wing from body to tip in meters (8 is default)
         # WingWidth: width of wing from front to back in meters (1 is default)
@@ -28,7 +31,7 @@ class AircraftVisualizer(pyglet.window.Window):
             Aircraft sprite does not affect parameters, just for visual effect. Sprites are NOT to scale.'''
 
         # vvvv USER INPUTS vvvv
-        physics.globalize_physics_vars(dihedral=-5, Mass=1000, WingLength=5.5, WingWidth=1.5, BodyArea=5,
+        physics.globalize_physics_vars(dihedral=-2, Mass=1000, WingLength=5.5, WingWidth=1.5, BodyArea=5,
                                        cLift_a0=0.25, cL_slope=0.2,
                                        altitude=1000, cruise=52, I_roll=1000, drag_mult = 1)
         

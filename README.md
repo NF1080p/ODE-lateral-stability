@@ -16,15 +16,21 @@ Our code is written in Python3. To reproduce our results, start by installing th
 
 Alternative (No virtual environment)
 
-1. Clone this repository
-2. Ensure python 3, math, matplotlib, numpy, os, pynput, sympy, and pyglet are installed via 'pip install' commands
-3. 
+1a. Clone this repository
+2a. Ensure python 3, math, matplotlib, numpy, os, pynput, sympy, and pyglet are installed via 'pip install' commands
+3a. Open the repository directory in a python environment (vscode)
 
-To run the sim, run `python vis.py` in your terminal. A GUI will pop up showing the aircraft motion. Close the sim by closing the GUI. This generates a file called `data-SIM_START_DATE_AND_TIME.txt` in the folder `./data/`. This file is formatted as:
-
-```
-horizontal position (m)     vertical position (m)     bank angle (deg)    time (s)
-```
-
-To plot this data, run `python grapher.py`.  
+4. Set the desired initial variables in the __init__ function of Simulator_Main.py
+5. Variables are preset with defaults and recommended variables are described in full 
+    in comments above the call to globalize_physics_vars()
+6. To run the sim, run `python Simulator_Main.py` in your terminal. A GUI will pop up showing the aircraft motion. 
+7. Enjoy the visual display of lateral stability/instabililty
+8. Once satisfied, end the sim by closing the GUI. The sim will end automatically if the aircaft hits one of its failure conditions
+9. This generates a file called `data-SIM_START_DATE_AND_TIME.txt` in the folder `./data/`. This file is formatted as:
+    ```
+    horizontal position (m)     vertical position (m)     bank angle (deg)    time (s)
+    ```
+10. To plot this data, run `python grapher.py`.
+11. The most recent set of data will be plotted
+11. To use the autopilot, run the 
 
