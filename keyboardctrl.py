@@ -26,7 +26,7 @@ def on_press(key, injected):
 
 
     except AttributeError:
-        print('special key {} pressed'.format(
+        print('Special key {} pressed'.format(
             key))
 
 def on_release(key, injected):
@@ -49,4 +49,4 @@ listener = keyboard.Listener(
     on_press=on_press,
     on_release=on_release)
 listener.start()
-print("kb active")
+print("Keyboard Inputs Active")

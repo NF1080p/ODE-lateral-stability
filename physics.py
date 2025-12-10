@@ -1,59 +1,12 @@
 import math
 
 
-# Variables
-dihedral = 0 # positive for dihedral, negative for anhedral
-
-I_roll = 1000 # moment of inertial about roll axis
-
-WingLength = 4 # half the wingspan
-WingWidth = 1 # chord length
-BodyArea = 5 # for Cfside, assume the body is roughly cylindrical so this acts for vertical drag and sideslip drag
-drag_mult = 1.0  # multiplier for drag forces
-
-a_default = 4 # angle of attack in deg
-cLift_a0 = 0.25  # lift coefficient NACA 2414
-cL_slope = 0.2 # rise per deg
-Mass = 1000  # mass in kg
-
-
-
-altitude = 1000  # altitude in feet up to FL400
-cruise = 52  # cruise speed in m/s (1.94 knots = 1 m/s)
-
-
-
-# Constants
-R0=8.314
-cp=1005  # specific heat at constant pressure for air
-M = 0.02897  # molar mass of air
-L = -2
-g = 9.81
-rho0 = 1.225  # sea level standard density kg/m^3
-P0 = 101325  # sea level standard pressure Pa
-T0 = 288.15  # sea level standard temperature K
-
-cd_body = 0.47 #sphere
-
-# Calculated Constants
-#LATEX
-PA = P0 * (1+g*altitude/(cp*T0))**(-cp*M/R0)  # ambient pressure at altitude https://en.wikipedia.org/wiki/Atmospheric_pressure
-TA = T0 + (L*altitude/1000)  # ambient temperature at altitude
-rhoA = 1/((R0/M*TA)/PA)  # ambient density at altitude (ideal gas law)
-
-WingArea = WingLength * WingWidth * 2 # for Cfrot
-
-Cdbody = BodyArea * cd_body # sideslip drag coefficient, note that the whole wing does not move at the same speed
-
-a_default = (Mass*g / (2* 0.5 * rhoA * cruise**2 * (WingArea/2) * math.cos(math.pi*dihedral/180)) - cLift_a0) / cL_slope # for mass to cancel with lift
      
 
-def globalize_physics_vars(dihedral=dihedral, WingLength=WingLength, WingWidth=WingWidth, BodyArea=BodyArea,
-                            cLift_a0=cLift_a0, cL_slope=cL_slope, Mass=Mass,
-                            altitude=altitude, cruise=cruise, I_roll=I_roll, drag_mult=1.0):
+def globalize_physics_vars(dihedral=0, Mass=1000, WingLength=4, WingWidth=1, BodyArea=5,
+                                cLift_a0=0.25, cL_slope=0.2, altitude=1000, cruise=52, I_roll=1000, drag_mult = 3):
      # Variables
     dihedral = dihedral # positive for dihedral, negative for anhedral
-
 
     WingLength = WingLength # half the wingspan
     WingWidth = WingWidth # chord length
@@ -174,7 +127,7 @@ def rotv_speed_r_l(w):
 
 # Lift Forces
 
-def leftlift_F(bank, AoA=a_default):
+def leftlift_F(bank, AoA):
     # right from our POV
     v = cruise
     cLift = cLift_a0 + cL_slope * AoA
@@ -186,7 +139,7 @@ def leftlift_F(bank, AoA=a_default):
 
     return (LiftX, LiftY)
 
-def rightlift_F(bank, AoA=a_default):
+def rightlift_F(bank, AoA):
     # left from our POV
     v = cruise
     cLift = cLift_a0 + cL_slope * AoA
@@ -278,6 +231,9 @@ def Tnet (vss, vy, bank, w):
 
 
 if __name__ == "__main__":
+
+    # NOT THE MAIN SIMULATION
+    # For testing physics engine and debugging.
     globalize_physics_vars(dihedral=0, Mass=1000, WingLength=4, WingWidth=1, BodyArea=5,
                                        cLift_a0=0.25, cL_slope=0.2,
                                        altitude=1000, cruise=52, I_roll=1000)

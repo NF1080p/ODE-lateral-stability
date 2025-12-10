@@ -3,7 +3,7 @@ import physics
 import keyboardctrl as kb
 
 
-def nick_test(x, y, bank, dx, dy, dbank, dt):
+def euler(x, y, bank, dx, dy, dbank, dt):
 
     Fnety = physics.Fnety(dx, dy, bank)
     ya =(1/physics.Mass) * Fnety
@@ -50,7 +50,7 @@ def second_order_DE_nonlinear_rk4_one_step(x, y, bank, dx, dy, dbank, dt):
         ap(kb.ap_on)
 
         T_input = kb.aileron_input * -300
-        print(T_natural, T_input)
+        #print(T_natural, T_input)
         return T_natural + T_input
     
     def ap(ap_on):
