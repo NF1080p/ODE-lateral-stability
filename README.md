@@ -32,5 +32,7 @@ Alternative (No virtual environment)
     ```
 10. To plot this data, run `python grapher.py`.
 11. The most recent set of data will be plotted
-11. To use the autopilot, run the 
+11. To use the autopilot, run the simulation as normal, but type 'p' into the terminal
+12. The terminal should acknowledge the input and will attempt to stabilize the aircraft
+13. In some cases of anhedral, stabilization may be impossible if the autopilot is activated too late.
 
