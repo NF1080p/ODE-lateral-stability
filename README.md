@@ -5,42 +5,6 @@ This repo contains code for our MAT292 Final Project. We created a simulation to
 (copy paste shortened version of our intro here)
 
 
-<!--                                                                                          
-                                 zzyumhddehmsxzz                                         
-                                zvh8YSRUYXVY500kx                                        
-                               xg5TXkwyzzzzywm087nz   zzz                                
-                             zpbVTly          xg1Xmzwh3Xnqnju                            
-                             oaUUtz        zwsofYOXVLGFNZ8hsvz                           
-                         wponcZPn       yri9VLHHIMOOPPNKIHIKP2kz                         
-                         yvh99UVz      yqhszwj1SUUUTSQQPNLKIJJK6y                        
-                            b0V1z      vmtxhYUUUUUTTSRPOONMKJIIK5z                       
-                            daYX       yxzkUSTTTTTSRRPPNNMLKJIHINlzz                     
-                            da1Uy zzz   zygPRRRSRRQQPONLKJJJIHHHIVwz                     
-                            da3Vnztqv    zjQOPPPPPOOONMKJIIIIHHHHJVw                     
-                           zea07914uyz    waOONNNNMMLLKJIHIIIHHHHHIM6y                   
-                            h0a9W8y       zs8QQNLLLLKKJJIIHHIIHHHHHIWx                   
-                            m9a6Uj        wcTRQPMKKKJJJIIIIHGGIIIIIUoz                   
-                           zu7a7V7z       q3QPONNLJIIIIIIIIIHHGGGHK5vz                   
-                            za9a1Wm       oZQQPONNMLJIHHIIIJJIIHHHHPgz                   
-                             l6a6WZw    zs7SSRQPPONMKJIIJIJJJJQUX4gw                     
-                             y5891Ubz     zunjicTJJKNOPONMKIN5y                          
-                     zyxxyzz zh496XVk           zwngca90agpz                             
-                 zzxodpyxk4hyzx2683TXuz                                                  
-                 zma90agvzzx8Xoe407XS4x                                                  
-                 m8568abclyzztZUT33XTT0z                  zz                             
-                xg32224654fx zyfSUYWUSWj              zzhQZz                             
-                xf22ZXWWVUVsz   iTVWUSR3s             zpOKLp                             
-                zl41ZWUTSSSqz   y0SUTSSTaz            z8MKKSvz                           
-                 yi1ZXUSSSZv    zsXSSSSR1rz           z6MKKLVt                           
-                  zl1XVSSVny     xdSSSSRVhz           zgOLLMMPgwz                        
-                    h2VSWoz      zpTSSSRSbz           zyYNNNNNNO3luwxyzzz                
-                    o7Zbwz       zsVSSSRS0y             y3QOOPPPPPPPPPTaw                
-                   zqpwz         zqUSSSRSaz              zxm5SOOPPPWctyz                 
-                                zykUTSSRUdz                  zyxxxyz                     
-                                 zxuuuuuux                                                -->
-
-
-
 
 ## Installation
 
@@ -50,11 +14,26 @@ Our code is written in Python3. To reproduce our results, start by installing th
 2. Create and activate virtual environment in Python
 3. Install the dependendencies: `pip install pyglet numpy pynput matplotlib sympy`
 
-To run the sim, run `python vis.py` in your terminal. A GUI will pop up showing the aircraft motion. Close the sim by closing the GUI. This generates a file called `data-SIM_START_DATE_AND_TIME.txt` in the folder `./data/`. This file is formatted as:
+Alternative (No virtual environment)
 
-```
-horizontal position (m)     vertical position (m)     bank angle (deg)    time (s)
-```
+1a. Clone this repository
+2a. Ensure python 3, math, matplotlib, numpy, os, pynput, sympy, and pyglet are installed via 'pip install' commands
+3a. Open the repository directory in a python environment (vscode)
 
-To plot this data, run `python grapher.py`.  
+4. Set the desired initial variables in the __init__ function of Simulator_Main.py
+5. Variables are preset with defaults and recommended variables are described in full 
+    in comments above the call to globalize_physics_vars()
+6. To run the sim, run `python Simulator_Main.py` in your terminal. A GUI will pop up showing the aircraft motion. 
+7. Enjoy the visual display of lateral stability/instabililty
+8. Once satisfied, end the sim by closing the GUI. The sim will end automatically if the aircaft hits one of its failure conditions
+9. This generates a file called `data-SIM_START_DATE_AND_TIME.txt` in the folder `./data/`. This file is formatted as:
+    ```
+    horizontal position (m)     vertical position (m)     bank angle (deg)    time (s)
+    ```
+10. To plot this data, run `python grapher.py`.
+11. The most recent set of data will be plotted
+12. To use manual control, run the simulation as normal, and type 'A' or 'D' into the terminal to bank left and right respectively
+13. To use the autopilot, run the simulation as normal, and type 'P' into the terminal. Note that manual control is disabled if autopilot is active.
+14. The terminal should acknowledge the input and will attempt to stabilize the aircraft
+15. In some cases of anhedral, stabilization may be impossible if the autopilot is activated too late.
 

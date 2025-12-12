@@ -1,6 +1,7 @@
 from pynput import keyboard
 import threading
 
+#Please note: keyboard listener automatically records keyboard inputs but only if typed into the console. Press A to bank left and D to bank right from viewer POV, and P to toggle autopilot.
 
 aileron_input = 0
 
@@ -26,7 +27,7 @@ def on_press(key, injected):
 
 
     except AttributeError:
-        print('special key {} pressed'.format(
+        print('Special key {} pressed'.format(
             key))
 
 def on_release(key, injected):
@@ -49,4 +50,5 @@ listener = keyboard.Listener(
     on_press=on_press,
     on_release=on_release)
 listener.start()
-print("kb active")
+print("Keyboard Inputs Active")
+
