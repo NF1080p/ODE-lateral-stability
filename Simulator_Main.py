@@ -77,12 +77,11 @@ class AircraftVisualizer(pyglet.window.Window):
 
         # Load aircraft sprite
         if physics.dihedral < 0:
-            sprite_file = "mirage.png"
+            sprite_file = "./assets/mirage.png"
         elif physics.dihedral > 0:
-            sprite_file = "777.png"
+            sprite_file = "./assets/777.png"
         else:
-            sprite_file = "su27.png"
-
+            sprite_file = "./assets/su27.png"
         super().__init__(WINDOW_WIDTH, WINDOW_HEIGHT, "Aircraft Visualizer - Pyglet 2.x")
         pyglet.gl.glClearColor(0.53, 0.81, 0.98, 1.0)  # Sky blue background
 
@@ -116,7 +115,7 @@ class AircraftVisualizer(pyglet.window.Window):
         pyglet.clock.schedule_interval(self.update, float(1/NUM_OF_FRAMES))
 
         # Load background image
-        self.background_img = pyglet.image.load("background.jpeg")
+        self.background_img = pyglet.image.load("./assets/background.jpeg")
         self.background_img.anchor_x = 0
         self.background_img.anchor_y = 0
         self.runtime = 0.0
@@ -183,7 +182,7 @@ class AircraftVisualizer(pyglet.window.Window):
             pyglet.app.exit()
 
         # Save position vs time data to txt file
-        with open(self.data_path_name, "a") as f:
+        with open(self.data_path_name, "w") as f:
             stringified = str(self.x1) + " " + str(self.y1) + " " + str(self.bank1) + " " + str(self.runtime) + "\n"
             f.write(stringified)
 
