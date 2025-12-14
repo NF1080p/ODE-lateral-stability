@@ -12,22 +12,22 @@ import physics
 class AircraftVisualizer(pyglet.window.Window):
     def __init__(self):
          # --- USER INPUTS GO HERE ---
-        ''' Physics parameters '''
-        # dihedral: positive is dihedral angle, negative is anhedral angle, 0 is flat wing
-            # try dihedral = -2 for a small anhedral angle typical of many aircraft
-            # try dihedral = 5 for a moderate dihedral angle typical of many general aviation aircraft
-            # try dihedral = 0 for flat wing like many fighter jets
-        # Mass: kg of aircraft (1000 is default)
-        # WingLength: length of wing from body to tip in meters (8 is default)
-        # WingWidth: width of wing from front to back in meters (1 is default)
-        # BodyArea: cross-sectional area of the body in m^2 (5 is default)
-        # cLift_a0: lift coefficient at 0 angle of attack (0.25 is default)
-        # cL_slope: lift coefficient slope per degree angle of attack (0.2 is default)
-        # altitude: altitude in feet (1000 is default)
-        # cruise: cruise speed in m/s (52 is default, ~100 knots)
-        # I_roll: moment of inertia about roll axis (1000 is default)
-        # drag_mult: multiplier for drag forces (1 is default), for debugging and parameter isolation, leave as 1 for realistic simulation
-        ''' All default parameters correspond to a C172 Skyhawk, small propellor aircraft. Aircraft sprite will change based on dihedral angle
+        ''' Physics parameters 
+         dihedral: positive is dihedral angle, negative is anhedral angle, 0 is flat wing
+             try dihedral = -2 for a small anhedral angle typical of many aircraft
+             try dihedral = 5 for a moderate dihedral angle typical of many general aviation aircraft
+             try dihedral = 0 for flat wing like many fighter jets
+         Mass: kg of aircraft (1000 is default)
+         WingLength: length of wing from body to tip in meters (8 is default)
+         WingWidth: width of wing from front to back in meters (1 is default)
+         BodyArea: cross-sectional area of the body in m^2 (5 is default)
+         cLift_a0: lift coefficient at 0 angle of attack (0.25 is default)
+         cL_slope: lift coefficient slope per degree angle of attack (0.2 is default)
+         altitude: altitude in feet (1000 is default)
+         cruise: cruise speed in m/s (52 is default, ~100 knots)
+         I_roll: moment of inertia about roll axis (1000 is default)
+         drag_mult: multiplier for drag forces (1 is default), for debugging and parameter isolation, leave as 1 for realistic simulation
+         All default parameters correspond to a C172 Skyhawk, small propellor aircraft. Aircraft sprite will change based on dihedral angle
             Aircraft sprite does not affect parameters, just for visual effect. Sprites are NOT to scale.'''
 
         # vvvv USER INPUTS vvvv
