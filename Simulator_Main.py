@@ -182,7 +182,7 @@ class AircraftVisualizer(pyglet.window.Window):
             pyglet.app.exit()
 
         # Save position vs time data to txt file
-        with open(self.data_path_name, "w") as f:
+        with open(self.data_path_name, "a") as f:
             stringified = str(self.x1) + " " + str(self.y1) + " " + str(self.bank1) + " " + str(self.runtime) + "\n"
             f.write(stringified)
 
