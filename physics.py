@@ -229,10 +229,6 @@ def constant_alt_angle(Fnety, bank):
     """
 
     AoAinc = -Fnety / (0.5 * rhoA * cruise**2 * (WingArea/2) * cL_slope * (math.cos(rad(bank)-rad(dihedral))+math.cos(rad(bank)+rad(dihedral))))
-    # print("AoAinc for constant altitude:", AoAinc)
-    # print("fnety for constant altitude:", Fnety)
-    # Supposedliftincrease = AoAinc * cL_slope * 0.5 * rhoA * cruise**2 * (WingArea/2) * (math.cos(rad(bank)-rad(dihedral))+math.cos(rad(bank)+rad(dihedral)))
-    # print("Supposed lift increase for constant altitude:", Supposedliftincrease)
     return AoAinc
 
 def AoAR(vss, vy, bank, w):
@@ -260,9 +256,17 @@ def AoAR(vss, vy, bank, w):
     return a_default - AoAadj
 
 def AoAL(vss, vy, bank, w):
-    # take the component of airflow (-velocity) perpendicular to the left wing
+    """
+    Returns the angle of attack for the left wing (right in our POV) in degrees
+    
+    vy: vertical speed
+    vss: sideslip speed (horizontal)
+    bank: bank angle in degrees
+    w: roll rate in deg/s
+    """
 
-    vsseff = -vss*math.sin(rad(bank+dihedral))
+    
+    vsseff = -vss*math.sin(rad(bank+dihedral)) # take the component of airflow (-velocity) perpendicular to the left wing
     vy_rot = rotv_speed_r_l(w)[1]  # left wing rotational velocity
     vy = vy + vy_rot
     vyeff = vy*math.cos(rad(bank+dihedral))
@@ -279,6 +283,15 @@ def AoAL(vss, vy, bank, w):
 # Net Force and Torques
 
 def Fnet (vss, vy, bank, w):
+    """
+    Returns net force as a tuple (Fx, Fy)
+    
+    vss: horizontal airspeed (m/s), positive to the right from our POV
+    vy: vertical speed
+    bank: bank angle in degrees
+    w: roll rate in deg/s
+    """
+
     weight = weight_F()[1]
     vertdrag = vertdrag_F(vy)[1]
     sidedrag = sidedrag_F(vss)[0]
@@ -298,18 +311,26 @@ def Fnet (vss, vy, bank, w):
         Fnety = weight + leftlift[1] + rightlift[1] + vertdrag
 
     Fnetx = sidedrag + leftlift[0] + rightlift[0]
-
     return (Fnetx, Fnety)
 
+
 def Tnet (vss, vy, bank, w):
+    """
+    Returns net torque in Nm
+
+    vss: horizontal airspeed (m/s), positive to the right from our POV
+    vy: vertical speed
+    bank: bank angle in degrees
+    w: roll rate in deg/s
+    """
+
     left_T = leftlift_T(leftlift_F(bank, AoAL(vss, vy, bank, w)))
     right_T = rightlift_T(rightlift_F(bank, AoAR(vss, vy, bank, w)))
     return left_T + right_T
 
 
 if __name__ == "__main__":
-
-    # NOT THE MAIN SIMULATION
+    # NOT THE MAIN SIMULATION (see Simulator_Main.py)
     # For testing physics engine and debugging.
     globalize_physics_vars(dihedral=0, Mass=1000, WingLength=4, WingWidth=1, BodyArea=5,
                                        cLift_a0=0.25, cL_slope=0.2,

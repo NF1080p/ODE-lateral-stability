@@ -32,12 +32,13 @@ class AircraftVisualizer(pyglet.window.Window):
          cruise: cruise speed in m/s (52 is default, ~100 knots)
          I_roll: moment of inertia about roll axis (1000 is default)
          drag_mult: multiplier for drag forces (1 is default), for debugging and parameter isolation, leave as 1 for realistic simulation
+         constant_Altitude: if True, aircraft will maintain constant altitude by adjusting vertical speed as needed (False is default)
          
          NOTE: All default parameters correspond to a C172 Skyhawk, small propellor aircraft. Aircraft sprite will change based on dihedral angle
          NOTE: Aircraft sprite does not affect parameters, just for visual effect. Sprites are NOT to scale.
 
-         aircraft_angle: initial bank angle in degrees (5.0 is a good perturbation amount to view stability)
-         worldscale: zoom level for visualizer (10 is default, can decrease if simulation ends by world exit too quickly)
+         self.aircraft_angle: initial bank angle in degrees (5.0 is a good perturbation amount to view stability)
+         self.worldscale: zoom level for visualizer (10 is default, can decrease if simulation ends by world exit too quickly)
          '''
 
         # vvvv USER INPUTS vvvv
@@ -52,7 +53,7 @@ class AircraftVisualizer(pyglet.window.Window):
                                        cruise=52, 
                                        I_roll=1000, 
                                        drag_mult=1,
-                                       Constant_Altitude=True
+                                       Constant_Altitude=False
                                        )
         
         self.aircraft_angle = 5.0  # starting perturbed angle in degrees, 0 is level flight
