@@ -1,9 +1,25 @@
+"""
+Second order differential equation solver
+"""
 import numpy as np
 import physics
 import keyboardctrl as kb
 
 
 def euler(x, y, bank, dx, dy, dbank, dt):
+    """
+    Euler's Method 
+    Args:
+        x (float): horizontal position
+        y (float): vertical position
+        bank (float): bank angle
+        dx (float): horizontal velocity
+        dy (float): vertical velocity
+        dbank (float): (bank) angular velocity 
+        dt (float): time step
+    Returns:
+        tuple: Updated values of (x, y, bank, dx, dy, dbank) after one Euler's method step
+    """
 
     Fnety = physics.Fnety(dx, dy, bank)
     ya =(1/physics.Mass) * Fnety
@@ -24,7 +40,22 @@ def euler(x, y, bank, dx, dy, dbank, dt):
 
     
 def second_order_DE_nonlinear_rk4_one_step(x, y, bank, dx, dy, dbank, dt):
-    # derivative functions to handle different inputs easy
+    """
+    Second Order Nonlinear Differential Equation Solver using 4th order Runga Kutta
+    Args:
+        x (float): horizontal position
+        y (float): vertical position
+        bank (float): bank angle
+        dx (float): horizontal velocity
+        dy (float): vertical velocity
+        dbank (float): (bank) angular velocity 
+        dt (float): time step
+    Returns:
+        tuple: Updated values of (x, y, bank, dx, dy, dbank) after one RK4 step
+    """
+
+    # Derivative functions to handle different inputs easy
+
     def f_dy(dy):
         return dy
     def f_ddy(dy, bank):
@@ -44,11 +75,11 @@ def second_order_DE_nonlinear_rk4_one_step(x, y, bank, dx, dy, dbank, dt):
     def f_ddbank(dx, dy, bank, dbank):
         return -(1/physics.I_roll) * inject_aileron_control(dx, dy, bank, dbank) # inputs to Tnet are vss, vy, bank, w
 
+    # Keyboard aileron control
+
     def inject_aileron_control(dx, dy, bank, dbank):
         T_natural = physics.Tnet(dx, dy, bank, dbank)
-
         ap(kb.ap_on)
-
         T_input = kb.aileron_input * -300
         #print(T_natural, T_input)
         return T_natural + T_input
@@ -60,12 +91,9 @@ def second_order_DE_nonlinear_rk4_one_step(x, y, bank, dx, dy, dbank, dt):
             else:
                 kb.aileron_input = 0
 
-
-    
-    #rk4 !!!
+    #RK4 steps
 
     # y substeps
-
     k1_y = dt * f_dy(dy)
     k1_dy = dt * f_ddy(dy, bank)
     
@@ -79,7 +107,6 @@ def second_order_DE_nonlinear_rk4_one_step(x, y, bank, dx, dy, dbank, dt):
     k4_dy = dt * f_ddy(dy + k3_dy, bank + dt*dbank)
     
     # x substeps
-    
     k1_x = dt * f_dx(dx)
     k1_dx = dt * f_ddx(dx, dy, bank)
     
@@ -93,7 +120,6 @@ def second_order_DE_nonlinear_rk4_one_step(x, y, bank, dx, dy, dbank, dt):
     k4_dx = dt * f_ddx(dx + k3_dx, dy + k3_dy, bank + dt*dbank)
     
     # bank substeps
-    
     k1_bank = dt * f_dbank(dbank)
     k1_dbank = dt * f_ddbank(dx, dy, bank, dbank)
     
@@ -119,8 +145,13 @@ def second_order_DE_nonlinear_rk4_one_step(x, y, bank, dx, dy, dbank, dt):
     bank1 = bank + (k1_bank + 2*k2_bank + 2*k3_bank + k4_bank) / 6
     dbank1 = dbank + (k1_dbank + 2*k2_dbank + 2*k3_dbank + k4_dbank) / 6
 
-    #print(f"dy1: {dy1}, dx1: {dx1}, dbank1: {dbank1}")
     return (x1, y1, bank1, dx1, dy1, dbank1)
+
+    
+"""
+DEPRECIATED CODE BELOW
+    This was code used for testing early versions of our simulation.
+"""
 
 def second_order_DE_nonlinear_rk4(y0, yprime0, x0, xprime0, bank0, bankprime0, steps, endval):
     """
@@ -134,6 +165,8 @@ def second_order_DE_nonlinear_rk4(y0, yprime0, x0, xprime0, bank0, bankprime0, s
         c (float): coefficient of y
         steps (int): number of time steps
         endval (int): simulate upto t = endval
+    Returns:
+        tuple: Arrays of (y, dy, x, dx, bank, dbank) over time
     """
     # generate t for plotting
     t = np.linspace(0, endval, steps)
@@ -244,6 +277,8 @@ def second_order_DE_nonlinear(y0, yprime0, x0, xprime0, bank0, bankprime0, steps
         c (float): coefficient of y
         steps (int): number of time steps
         endval (int): simulate upto t = endval
+    Returns:
+        tuple: Arrays of (y, dy, x, dx, bank, dbank)
     """
     # generate t for plotting
     t = np.linspace(0, endval, steps)
@@ -297,6 +332,8 @@ def second_order_DE(y0, yprime0, a, b, c, f_t, steps, endval):
         c (float): coefficient of y
         steps (int): number of time steps
         endval (int): simulate upto t = endval
+    Returns:
+        tuple: Arrays of (y, dy) over time
     """
     # generate t for plotting
     t = np.linspace(0, endval, steps)
