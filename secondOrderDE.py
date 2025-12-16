@@ -39,7 +39,7 @@ def euler(x, y, bank, dx, dy, dbank, dt):
     return(x1, y1, bank1, dx1, dy1, dbank1)
 
     
-def second_order_DE_nonlinear_rk4_one_step(x, y, bank, dx, dy, dbank, dt):
+def second_order_DE_rk4(x, y, bank, dx, dy, dbank, dt):
     """
     Second Order Nonlinear Differential Equation Solver using 4th order Runga Kutta
     Args:

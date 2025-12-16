@@ -24,7 +24,7 @@ def globalize_physics_vars(dihedral=0, Mass=1000, WingLength=4, WingWidth=1, Bod
     altitude = altitude  # altitude in feet up to FL400
     cruise = cruise  # cruise speed in m/s (1.94 knots = 1 m/s)
 
-
+    STALLANGLE = 15  # degrees
 
     # Constants
     R0=8.314
@@ -58,7 +58,7 @@ def globalize_physics_vars(dihedral=0, Mass=1000, WingLength=4, WingWidth=1, Bod
         "altitude", "cruise",
         "R0", "cp", "M", "L", "g", "rho0", "P0", "T0",
         "cd_body", "Cdbody",
-        "PA", "TA", "rhoA", "WingArea", "I_roll", "Cdbody", "drag_mult"
+        "PA", "TA", "rhoA", "WingArea", "I_roll", "Cdbody", "drag_mult", "STALLANGLE"
     ]
      
     for _name in _physics_vars:
@@ -70,11 +70,18 @@ def globalize_physics_vars(dihedral=0, Mass=1000, WingLength=4, WingWidth=1, Bod
     print("Altitude:", altitude)
     print("AoA cruise:", a_default)
 
-# assumptions, pressure does not change much with slight altitude changes
 
 # Helper functions
 def rad(theta):
+    """
+    Converts degrees to radians
+    
+    theta: angle in degrees
+    """
+
     return theta * math.pi / 180
+
+
 
 
 """
@@ -95,7 +102,14 @@ All torques are scalars
 
 
 # Drag Forces
+
 def sidedrag_F(vss):
+    """
+    Returns the side drag force as a tuple (Fx, Fy)
+    
+    vss: sideslip velocity (m/s), positive to the right from our POV
+    """
+
     if vss < 0:
         # slipping left, so drag to the right (+)
         return (0.5 * rhoA * vss**2 * Cdbody * drag_mult, 0)
@@ -104,6 +118,12 @@ def sidedrag_F(vss):
         return (-0.5 * rhoA * vss**2 * Cdbody * drag_mult, 0)
 
 def vertdrag_F(vy):
+    """
+    Returns the vertical drag force as a tuple (Fx, Fy)
+    
+    vy: vertical velocity (m/s), positive up from our POV
+    """
+
     if vy < 0:
         # falling down, so drag up (+)
         return (0, 0.5 * rhoA * vy**2 * Cdbody * drag_mult)
@@ -112,15 +132,13 @@ def vertdrag_F(vy):
         return (0, -0.5 * rhoA * vy**2 * Cdbody * drag_mult)
 
 
-#Drag Torque
-# def rotdrag_T(w): #CHANGE TO AFFECT AOA
-#     #integral of F (prop to v^2) over the lever arm (increases linearly)
-#     average_lin_v = rad(w) * WingLength / 2  # average linear velocity of the wing
-#     unitlengthdrag = 0.5 * rhoA * (average_lin_v)**2 * WingArea
-#     LeverLength = WingLength*WingLength / 2  # triangle: integral of length from 0 to WingLength
-#     return -unitlengthdrag * LeverLength * drag_mult
-
 def rotv_speed_r_l(w):
+    """
+    Returns the average linear vertical velocity at the right and left wing tips due to roll rate w as a tuple (vr, vl)
+    
+    w: roll rate in deg/s, positive is rolling left from our POV
+    """
+
     average_lin_v = (rad(w) * WingLength / 2)*3
     return (-average_lin_v, average_lin_v)  # right wing speed, left wing speed
 
@@ -128,7 +146,13 @@ def rotv_speed_r_l(w):
 # Lift Forces
 
 def leftlift_F(bank, AoA):
-    # right from our POV
+    """
+    Returns the left wing lift force as a tuple (Fx, Fy)
+    
+    bank: bank angle in degrees, positive is right wing down from our POV
+    AoA: angle of attack in degrees for left wing (right from our POV)
+    """
+
     v = cruise
     cLift = cLift_a0 + cL_slope * AoA
     TotalLiftLeft = 0.5 * rhoA * v**2 * cLift * (WingArea/2)
@@ -140,7 +164,12 @@ def leftlift_F(bank, AoA):
     return (LiftX, LiftY)
 
 def rightlift_F(bank, AoA):
-    # left from our POV
+    """
+    Returns the right wing lift force as a tuple (Fx, Fy)
+    
+    bank: bank angle in degrees, positive is right wing down from our POV
+    AoA: angle of attack in degrees for right wing (right from our POV)
+    """
     v = cruise
     cLift = cLift_a0 + cL_slope * AoA
     TotalLiftRight = 0.5 * rhoA * v**2 * cLift * (WingArea/2)
@@ -154,38 +183,64 @@ def rightlift_F(bank, AoA):
 # Lift Torques
 
 def leftlift_T(leftlift):
-    # assumes lift is in the center of the wing
+    """
+    Returns the left wing lift torque assuming lift is in the center of the wing
+    
+    leftlift: left wing lift force as a tuple (Fx, Fy)
+    """
+
     # tends to roll to our left, so negative
     return -leftlift[1] * WingLength/2
 
 def rightlift_T(rightlift):
-    # assumes lift is in the center of the wing
+    """
+    Returns the right wing lift torque assuming lift is in the center of the wing
+    
+    rightlift: right wing lift force as a tuple (Fx, Fy)
+    """
+
     # tends to roll to our right, so positive
     return rightlift[1] * WingLength/2
 
 # Weight Force
+
 def weight_F():
+    """
+    Returns the weight force as a tuple (Fx, Fy)
+    """
     return (0, -Mass * g)
 
 # Angle Calculations
 
 def side_slip_angle(vy, vss):
-    #b
-    # we dont really care about sideslip angle since we are breaking it up into vvert and vss
+    """
+    Returns the sideslip angle in degrees
+    
+    vy: vertical speed
+    vss: sideslip speed (horizontal)
+    """
     return math.degrees(math.atan2(vy, vss))
 
 def AoAR(vss, vy, bank, w):
-    # take the component of airflow (-velocity) perpendicular to the right wing
-    vsseff = -vss*math.sin(rad(bank-dihedral))
+    """
+    Returns the angle of attack for the right wing in degrees
+    
+    vy: vertical speed
+    vss: sideslip speed (horizontal)
+    bank: bank angle in degrees
+    w: roll rate in deg/s
+    """
+    
+    vsseff = -vss*math.sin(rad(bank-dihedral)) # take the component of airflow (-velocity) perpendicular to the right wing
     vy_rot = rotv_speed_r_l(w)[0]  # right wing rotational velocity
-    vy = vy + vy_rot
+    vy = vy + vy_rot # find effective vertical speed at right wing
     vyeff = vy*math.cos(rad(bank-dihedral))
     
     # find total angle deviation from cruise deflecting in angle perpendicular to right wing
     AoAadj = math.degrees(math.atan2(vyeff+vsseff, cruise))
 
-    # Stall condition
-    if ((a_default - AoAadj) > 15) | ((a_default - AoAadj) < -15):
+    # Stall condition exit case
+    if ((a_default - AoAadj) > STALLANGLE) | ((a_default - AoAadj) < -STALLANGLE):
         raise ValueError("stall condition")
 
     return a_default - AoAadj

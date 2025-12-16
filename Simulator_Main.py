@@ -1,7 +1,7 @@
 import pyglet
 from pyglet import shapes
 import math
-from secondOrderDE import second_order_DE_nonlinear_rk4_one_step
+from secondOrderDE import second_order_DE_rk4
 from pathlib import Path
 from datetime import datetime
 import numpy as np
@@ -12,9 +12,14 @@ import physics
 class AircraftVisualizer(pyglet.window.Window):
     def __init__(self):
          # --- USER INPUTS GO HERE ---
-        ''' Physics parameters 
+
+        ''' 
+         Initializes all needed variables for the simulation and physics engine. 
+
+
+         Physics parameters 
          dihedral: positive is dihedral angle, negative is anhedral angle, 0 is flat wing
-             try dihedral = -2 for a small anhedral angle typical of many aircraft
+             try dihedral = -3 for a small anhedral angle typical of some military aircraft
              try dihedral = 5 for a moderate dihedral angle typical of many general aviation aircraft
              try dihedral = 0 for flat wing like many fighter jets
          Mass: kg of aircraft (1000 is default)
@@ -27,13 +32,26 @@ class AircraftVisualizer(pyglet.window.Window):
          cruise: cruise speed in m/s (52 is default, ~100 knots)
          I_roll: moment of inertia about roll axis (1000 is default)
          drag_mult: multiplier for drag forces (1 is default), for debugging and parameter isolation, leave as 1 for realistic simulation
-         All default parameters correspond to a C172 Skyhawk, small propellor aircraft. Aircraft sprite will change based on dihedral angle
-            Aircraft sprite does not affect parameters, just for visual effect. Sprites are NOT to scale.'''
+         
+         NOTE: All default parameters correspond to a C172 Skyhawk, small propellor aircraft. Aircraft sprite will change based on dihedral angle
+         NOTE: Aircraft sprite does not affect parameters, just for visual effect. Sprites are NOT to scale.
+
+         aircraft_angle: initial bank angle in degrees (5.0 is a good perturbation amount to view stability)
+         worldscale: zoom level for visualizer (10 is default, can decrease if simulation ends by world exit too quickly)
+         '''
 
         # vvvv USER INPUTS vvvv
-        physics.globalize_physics_vars(dihedral=-2, Mass=1000, WingLength=5.5, WingWidth=1.5, BodyArea=5,
-                                       cLift_a0=0.25, cL_slope=0.2,
-                                       altitude=1000, cruise=52, I_roll=1000, drag_mult = 1)
+        physics.globalize_physics_vars(dihedral=-3, 
+                                       Mass=1000, 
+                                       WingLength=5.5, 
+                                       WingWidth=1.5, 
+                                       BodyArea=5,
+                                       cLift_a0=0.25, 
+                                       cL_slope=0.2,
+                                       altitude=1000, 
+                                       cruise=52, 
+                                       I_roll=1000, 
+                                       drag_mult = 1)
         
         self.aircraft_angle = 5.0  # starting perturbed angle in degrees, 0 is level flight
         self.worldscale = 10  # zoom level, 10 is default
@@ -93,7 +111,7 @@ class AircraftVisualizer(pyglet.window.Window):
             x=0,
             y=0
         )
-        self.aircraft_sprite.scale = self.worldscale / 20  # Scale down the aircraft sprite
+        self.aircraft_sprite.scale = self.worldscale / 22  # Scale down the aircraft sprite
 
 
         # Camera init pos (defining top-left corner)
@@ -106,11 +124,12 @@ class AircraftVisualizer(pyglet.window.Window):
         self.data_path_name = Path("data") / f"data-{timestamp}.txt"
 
         # HUD labels
-        self.label_pos = pyglet.text.Label('', x=10, y=WINDOW_HEIGHT-30)
-        self.label_pitch = pyglet.text.Label('', x=10, y=WINDOW_HEIGHT-60)
+        self.label_pos = pyglet.text.Label('', x=15, y=WINDOW_HEIGHT-30)
+        self.label_bank = pyglet.text.Label('', x=15, y=WINDOW_HEIGHT-60)
+        self.label_dbank = pyglet.text.Label('', x=15, y=WINDOW_HEIGHT-90)
+        self.label_liftl = pyglet.text.Label('', x=700, y=WINDOW_HEIGHT-30)
+        self.label_liftr = pyglet.text.Label('', x=350, y=WINDOW_HEIGHT-30)
 
-
-        
         # 60 FPS
         pyglet.clock.schedule_interval(self.update, float(1/NUM_OF_FRAMES))
 
@@ -120,7 +139,6 @@ class AircraftVisualizer(pyglet.window.Window):
         self.background_img.anchor_y = 0
         self.runtime = 0.0
 
-
         # load init plot coords
         self.plot_coordy = self.aircraft_y - self.cam_x # not right coody is a relative aircraft is a global
         self.plot_coordx = self.aircraft_x  - self.cam_y
@@ -128,11 +146,13 @@ class AircraftVisualizer(pyglet.window.Window):
         self.scaled_aircraft_y = self.plot_coordy + self.cam_y
         print("\nRunning  .  .  . \n")
 
-        
 
 
     def camera(self):
-        # Camera 
+        """
+        Camera follows aircraft within world boundaries
+        """
+        
         left_edge = self.cam_x + self.VIEWPORT_MARGIN
         right_edge = self.cam_x + WINDOW_WIDTH - self.VIEWPORT_MARGIN
         bottom_edge = self.cam_y + self.VIEWPORT_MARGIN
@@ -155,11 +175,23 @@ class AircraftVisualizer(pyglet.window.Window):
     def update(self, dt):
         self.runtime += dt
         
-        # --- Calculate new aircraft properties from previous using RK 4 solver ---
-        self.x1, self.y1, self.bank1, self.dx1, self.dy1, self.dbank1 = second_order_DE_nonlinear_rk4_one_step(self.aircraft_x, self.aircraft_y, self.aircraft_angle, 
-                                                                                                               self.aircraft_dx, self.aircraft_dy, self.aircraft_dangle, 
-                                                                                                               1/NUM_OF_FRAMES)
+        """
+        Calculate new aircraft properties from previous using RK 4 solver and
+        update positions and velocities in each time step. Camera and HUD updated here 
+        as well as failure condition checks and data recording.
+        """
 
+        # RK4 solver step
+        self.x1, self.y1, self.bank1, self.dx1, self.dy1, self.dbank1 = second_order_DE_rk4(
+                                                                                        self.aircraft_x, 
+                                                                                        self.aircraft_y, 
+                                                                                        self.aircraft_angle, 
+                                                                                        self.aircraft_dx, 
+                                                                                        self.aircraft_dy, 
+                                                                                        self.aircraft_dangle, 
+                                                                                        1/NUM_OF_FRAMES
+                                                                                        )
+        
         # Update positions       
         self.aircraft_x = self.x1
         self.aircraft_y = self.y1
@@ -177,6 +209,7 @@ class AircraftVisualizer(pyglet.window.Window):
         if (self.scaled_aircraft_y < 0) or (self.scaled_aircraft_y > pic_height) or (self.scaled_aircraft_x < 0) or (self.scaled_aircraft_x > pic_width):
             print("Aircraft has left the world boundaries. Simulation ending.")
             pyglet.app.exit()
+
         elif (self.aircraft_angle < -90) or (self.aircraft_angle > 90):
             print("Aircraft has exceeded safe bank angle. Simulation ending.")
             pyglet.app.exit()
@@ -190,11 +223,27 @@ class AircraftVisualizer(pyglet.window.Window):
         self.cam_x, self.cam_y = self.camera()
         
         # Update HUD text
-        self.label_pos.text = f"Aircraft init pos: ({self.aircraft_x:.1f}, {self.aircraft_y:.1f})"
-        self.label_pitch.text = f"Bank: {self.aircraft_angle:.1f}°"
+        self.label_pos.text = f"Aircraft position: ({self.aircraft_x:.1f}, {self.aircraft_y:.1f})"
+        self.label_bank.text = f"Bank: {self.aircraft_angle:.1f}°"
+        self.label_dbank.text = f"Angular velocity: {self.aircraft_dangle:.1f}°/s"
+        AoAl = physics.AoAL(self.aircraft_dx, self.aircraft_dy, self.aircraft_angle, self.aircraft_dangle)
+        AoAr = physics.AoAR(self.aircraft_dx, self.aircraft_dy, self.aircraft_angle, self.aircraft_dangle)
+        Liftl = physics.leftlift_F(self.aircraft_angle, AoAl)
+        Liftl = (int(Liftl[0]/100), int(Liftl[1]/100))
+        Liftl = (Liftl[0]*100, Liftl[1]*100)
+        Liftr = physics.rightlift_F(self.aircraft_angle, AoAr)
+        Liftr = (int(Liftr[0]/100), int(Liftr[1]/100))
+        Liftr = (Liftr[0]*100, Liftr[1]*100)
+        self.label_liftl.text = f"L lift (right in POV): {Liftl[0]:.0f}, {Liftl[1]:.0f} N"
+        self.label_liftr.text = f"R lift (left in POV): {Liftr[0]:.0f}, {Liftr[1]:.0f} N"
 
 
     def on_draw(self):
+        """
+        Render the aircraft, background, HUD elements, and grid
+        Also computes relative (scaled) aircraft position for plotting and camera clamping
+        """
+
         self.clear()
 
         # Draw background
@@ -214,30 +263,34 @@ class AircraftVisualizer(pyglet.window.Window):
         self.relativex = self.aircraft_x - self.initx
         self.relativey = self.aircraft_y - self.inity
 
-        #scaled relative coords
+        # scaled relative coords
         srelativex = self.relativex * self.worldscale
         srelativey = self.relativey * self.worldscale
         
         self.plot_coordx = -self.cam_x + self.initx + srelativex
         self.plot_coordy = -self.cam_y + self.inity + srelativey
 
-
-        #self.aircraft_sprite.anchor_x = wing/4
-        #self.aircraft_sprite.anchor_y = length/4
         # must be negative to agree with convention. rolling right is positive bank angle for pilot's view, angle is between the (pilots) left wing and the horizontal
         self.aircraft_sprite.rotation = -self.aircraft_angle
         self.aircraft_sprite.x = self.plot_coordx
         self.aircraft_sprite.y = self.plot_coordy
 
         # draw aircraft
-        #aircraft.draw()
         self.aircraft_sprite.draw()
+        
         # Draw HUD
         self.label_pos.draw()
-        self.label_pitch.draw()
-        
-
+        self.label_bank.draw()
+        self.label_dbank.draw()
+        self.label_liftl.draw()
+        self.label_liftr.draw()
 
 if __name__ == "__main__":
+    """
+    Main entry point for the aircraft visualizer simulation. 
+    Run this file to start the simulation with your initial conditions inputted in __init__.
+    The simulation will run until the aircraft leaves the world boundaries or exceeds safe bank angles.
+    """
+
     window = AircraftVisualizer()
     pyglet.app.run()
