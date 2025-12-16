@@ -21,10 +21,9 @@ def euler(x, y, bank, dx, dy, dbank, dt):
         tuple: Updated values of (x, y, bank, dx, dy, dbank) after one Euler's method step
     """
 
-    Fnety = physics.Fnety(dx, dy, bank)
+    Fnetx, Fnety = physics.Fnet(dx, dy, bank)
     ya =(1/physics.Mass) * Fnety
     
-    Fnetx = physics.Fnetx(dx, dy, bank)
     xa = (1/physics.Mass) * Fnetx # inputs to Fnetx are vss, vy, bank
 
     ba = -(1/physics.I_roll) * physics.Tnet(dx, dy, bank, dbank) # inputs to Tnet are vss, vy, bank, w
@@ -59,14 +58,14 @@ def second_order_DE_rk4(x, y, bank, dx, dy, dbank, dt):
     def f_dy(dy):
         return dy
     def f_ddy(dy, bank):
-        Fnety = physics.Fnety(dx, dy, bank, dbank)
+        Fnety = physics.Fnet(dx, dy, bank, dbank)[1]
         return (1/physics.Mass) * Fnety
     
     def f_dx(dx):
         return dx 
     
     def f_ddx(dx, dy, bank):
-        Fnetx = physics.Fnetx(dx, dy, bank, dbank)
+        Fnetx = physics.Fnet(dx, dy, bank, dbank)[0]
         return (1/physics.Mass) * Fnetx # inputs to Fnetx are vss, vy, bank
     
     def f_dbank(dbank):
@@ -195,7 +194,7 @@ def second_order_DE_nonlinear_rk4(y0, yprime0, x0, xprime0, bank0, bankprime0, s
         return dx 
     
     def f_ddx(dx, dy, bank):
-        return (1/physics.Mass) * physics.Fnetx(dx, dy, bank) # inputs to Fnetx are vss, vy, bank
+        return (1/physics.Mass) * physics.Fnet(dx, dy, bank)[0] # inputs to Fnetx are vss, vy, bank
     
     def f_dbank(dbank):
         return dbank
@@ -302,7 +301,7 @@ def second_order_DE_nonlinear(y0, yprime0, x0, xprime0, bank0, bankprime0, steps
         # euler's method: 
         ddy = -physics.g -0.5/physics.Mass * physics.rhoA * physics.cd_body * abs(dy[n])*dy[n] + physics.leftlift_F(bank[n], physics.a_default)[1]/physics.Mass + physics.rightlift_F(bank[n], physics.a_default)[1]/physics.Mass
 
-        ddx = (1/physics.Mass) * physics.Fnetx(dx[n], dy[n], bank[n]) # inputs to Fnetx are vss, vy, bank
+        ddx = (1/physics.Mass) * physics.Fnet(dx[n], dy[n], bank[n])[0] # inputs to Fnetx are vss, vy, bank
 
         ddbank = (1/physics.I_roll) * physics.Tnet(dx[n], dy[n], bank[n], dbank[n]) # inputs to Tnet are vss, vy, bank, w
 

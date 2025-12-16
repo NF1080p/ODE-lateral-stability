@@ -41,7 +41,7 @@ class AircraftVisualizer(pyglet.window.Window):
          '''
 
         # vvvv USER INPUTS vvvv
-        physics.globalize_physics_vars(dihedral=-3, 
+        physics.globalize_physics_vars(dihedral=3, 
                                        Mass=1000, 
                                        WingLength=5.5, 
                                        WingWidth=1.5, 
@@ -51,7 +51,9 @@ class AircraftVisualizer(pyglet.window.Window):
                                        altitude=1000, 
                                        cruise=52, 
                                        I_roll=1000, 
-                                       drag_mult = 1)
+                                       drag_mult=1,
+                                       Constant_Altitude=True
+                                       )
         
         self.aircraft_angle = 5.0  # starting perturbed angle in degrees, 0 is level flight
         self.worldscale = 10  # zoom level, 10 is default
@@ -107,10 +109,10 @@ class AircraftVisualizer(pyglet.window.Window):
         self.aircraft_image.anchor_x = self.aircraft_image.width // 2
         self.aircraft_image.anchor_y = self.aircraft_image.height // 2
         self.aircraft_sprite = pyglet.sprite.Sprite(
-            img=self.aircraft_image,
-            x=0,
-            y=0
-        )
+                                                    img=self.aircraft_image,
+                                                    x=0,
+                                                    y=0
+                                                    )
         self.aircraft_sprite.scale = self.worldscale / 22  # Scale down the aircraft sprite
 
 
@@ -124,9 +126,9 @@ class AircraftVisualizer(pyglet.window.Window):
         self.data_path_name = Path("data") / f"data-{timestamp}.txt"
 
         # HUD labels
-        self.label_pos = pyglet.text.Label('', x=15, y=WINDOW_HEIGHT-30)
-        self.label_bank = pyglet.text.Label('', x=15, y=WINDOW_HEIGHT-60)
-        self.label_dbank = pyglet.text.Label('', x=15, y=WINDOW_HEIGHT-90)
+        self.label_pos = pyglet.text.Label('', x=15, y=WINDOW_HEIGHT-610)
+        self.label_bank = pyglet.text.Label('', x=15, y=WINDOW_HEIGHT-640)
+        self.label_dbank = pyglet.text.Label('', x=15, y=WINDOW_HEIGHT-670)
         self.label_liftl = pyglet.text.Label('', x=700, y=WINDOW_HEIGHT-30)
         self.label_liftr = pyglet.text.Label('', x=350, y=WINDOW_HEIGHT-30)
 
@@ -226,16 +228,16 @@ class AircraftVisualizer(pyglet.window.Window):
         self.label_pos.text = f"Aircraft position: ({self.aircraft_x:.1f}, {self.aircraft_y:.1f})"
         self.label_bank.text = f"Bank: {self.aircraft_angle:.1f}°"
         self.label_dbank.text = f"Angular velocity: {self.aircraft_dangle:.1f}°/s"
-        AoAl = physics.AoAL(self.aircraft_dx, self.aircraft_dy, self.aircraft_angle, self.aircraft_dangle)
-        AoAr = physics.AoAR(self.aircraft_dx, self.aircraft_dy, self.aircraft_angle, self.aircraft_dangle)
-        Liftl = physics.leftlift_F(self.aircraft_angle, AoAl)
-        Liftl = (int(Liftl[0]/100), int(Liftl[1]/100))
-        Liftl = (Liftl[0]*100, Liftl[1]*100)
-        Liftr = physics.rightlift_F(self.aircraft_angle, AoAr)
-        Liftr = (int(Liftr[0]/100), int(Liftr[1]/100))
-        Liftr = (Liftr[0]*100, Liftr[1]*100)
-        self.label_liftl.text = f"L lift (right in POV): {Liftl[0]:.0f}, {Liftl[1]:.0f} N"
-        self.label_liftr.text = f"R lift (left in POV): {Liftr[0]:.0f}, {Liftr[1]:.0f} N"
+        # AoAl = physics.AoAL(self.aircraft_dx, self.aircraft_dy, self.aircraft_angle, self.aircraft_dangle)
+        # AoAr = physics.AoAR(self.aircraft_dx, self.aircraft_dy, self.aircraft_angle, self.aircraft_dangle)
+        # Liftl = physics.leftlift_F(self.aircraft_angle, AoAl)
+        # Liftl = (int(Liftl[0]/100), int(Liftl[1]/100))
+        # Liftl = (Liftl[0]*100, Liftl[1]*100)
+        # Liftr = physics.rightlift_F(self.aircraft_angle, AoAr)
+        # Liftr = (int(Liftr[0]/100), int(Liftr[1]/100))
+        # Liftr = (Liftr[0]*100, Liftr[1]*100)
+        # self.label_liftl.text = f"L lift (right in POV): {Liftl[0]:.0f}, {Liftl[1]:.0f} N"
+        # self.label_liftr.text = f"R lift (left in POV): {Liftr[0]:.0f}, {Liftr[1]:.0f} N"
 
 
     def on_draw(self):

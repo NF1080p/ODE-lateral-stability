@@ -4,7 +4,7 @@ import math
      
 
 def globalize_physics_vars(dihedral=0, Mass=1000, WingLength=4, WingWidth=1, BodyArea=5,
-                                cLift_a0=0.25, cL_slope=0.2, altitude=1000, cruise=52, I_roll=1000, drag_mult = 3):
+                                cLift_a0=0.25, cL_slope=0.2, altitude=1000, cruise=52, I_roll=1000, drag_mult = 3, Constant_Altitude = False):
      # Variables
     dihedral = dihedral # positive for dihedral, negative for anhedral
 
@@ -23,6 +23,8 @@ def globalize_physics_vars(dihedral=0, Mass=1000, WingLength=4, WingWidth=1, Bod
 
     altitude = altitude  # altitude in feet up to FL400
     cruise = cruise  # cruise speed in m/s (1.94 knots = 1 m/s)
+
+    Constant_Altitude = Constant_Altitude  # whether to adjust AoA to maintain constant altitude
 
     STALLANGLE = 15  # degrees
 
@@ -44,7 +46,7 @@ def globalize_physics_vars(dihedral=0, Mass=1000, WingLength=4, WingWidth=1, Bod
     TA = T0 + (L*altitude/1000)  # ambient temperature at altitude
     rhoA = 1/((R0/M*TA)/PA)  # ambient density at altitude (ideal gas law)
 
-    WingArea = WingLength * WingWidth * 2 # for Cfrot
+    WingArea = WingLength * WingWidth * 2
 
     Cdbody = BodyArea * cd_body # sideslip drag coefficient, note that the whole wing does not move at the same speed
 
@@ -58,7 +60,7 @@ def globalize_physics_vars(dihedral=0, Mass=1000, WingLength=4, WingWidth=1, Bod
         "altitude", "cruise",
         "R0", "cp", "M", "L", "g", "rho0", "P0", "T0",
         "cd_body", "Cdbody",
-        "PA", "TA", "rhoA", "WingArea", "I_roll", "Cdbody", "drag_mult", "STALLANGLE"
+        "PA", "TA", "rhoA", "WingArea", "I_roll", "Cdbody", "drag_mult", "STALLANGLE", "Constant_Altitude"
     ]
      
     for _name in _physics_vars:
@@ -221,6 +223,18 @@ def side_slip_angle(vy, vss):
     """
     return math.degrees(math.atan2(vy, vss))
 
+def constant_alt_angle(Fnety, bank):
+    """
+    Returns the angle of attack required to maintain constant altitude in degrees
+    """
+
+    AoAinc = -Fnety / (0.5 * rhoA * cruise**2 * (WingArea/2) * cL_slope * (math.cos(rad(bank)-rad(dihedral))+math.cos(rad(bank)+rad(dihedral))))
+    # print("AoAinc for constant altitude:", AoAinc)
+    # print("fnety for constant altitude:", Fnety)
+    # Supposedliftincrease = AoAinc * cL_slope * 0.5 * rhoA * cruise**2 * (WingArea/2) * (math.cos(rad(bank)-rad(dihedral))+math.cos(rad(bank)+rad(dihedral)))
+    # print("Supposed lift increase for constant altitude:", Supposedliftincrease)
+    return AoAinc
+
 def AoAR(vss, vy, bank, w):
     """
     Returns the angle of attack for the right wing in degrees
@@ -264,20 +278,28 @@ def AoAL(vss, vy, bank, w):
 
 # Net Force and Torques
 
-def Fnety (vss, vy, bank, w):
+def Fnet (vss, vy, bank, w):
     weight = weight_F()[1]
     vertdrag = vertdrag_F(vy)[1]
-    leftlift = leftlift_F(bank, AoAL(vss, vy, bank, w))[1]
-    rightlift = rightlift_F(bank, AoAR(vss, vy, bank, w))[1]
-
-    return weight + leftlift + rightlift + vertdrag
-
-def Fnetx (vss, vy, bank, w):
     sidedrag = sidedrag_F(vss)[0]
-    leftlift = leftlift_F(bank, AoAL(vss, vy, bank, w))[0]
-    rightlift = rightlift_F(bank, AoAR(vss, vy, bank, w))[0]
+    AOAL = AoAL(vss, vy, bank, w)
+    AOAR = AoAR(vss, vy, bank, w)
+    leftlift = leftlift_F(bank, AOAL)
+    rightlift = rightlift_F(bank, AOAR)
+    Fnety = weight + leftlift[1] + rightlift[1] + vertdrag
 
-    return sidedrag + leftlift + rightlift
+    if Constant_Altitude:
+        AoAinc = constant_alt_angle(Fnety, bank)
+        # print("AoAinc for constant altitude:", AoAinc)
+        AOAL += AoAinc
+        AOAR += AoAinc
+        leftlift = leftlift_F(bank, AOAL)
+        rightlift = rightlift_F(bank, AOAR)
+        Fnety = weight + leftlift[1] + rightlift[1] + vertdrag
+
+    Fnetx = sidedrag + leftlift[0] + rightlift[0]
+
+    return (Fnetx, Fnety)
 
 def Tnet (vss, vy, bank, w):
     left_T = leftlift_T(leftlift_F(bank, AoAL(vss, vy, bank, w)))
@@ -291,7 +313,7 @@ if __name__ == "__main__":
     # For testing physics engine and debugging.
     globalize_physics_vars(dihedral=0, Mass=1000, WingLength=4, WingWidth=1, BodyArea=5,
                                        cLift_a0=0.25, cL_slope=0.2,
-                                       altitude=1000, cruise=52, I_roll=1000)
+                                       altitude=1000, cruise=52, I_roll=1000, drag_mult = 1, Constant_Altitude = True)
 
     # simple test
     bank = 15  # degrees counter clockwise    _o/
@@ -303,6 +325,6 @@ if __name__ == "__main__":
     #    _o/    slipping <- and falling v
     print("AoAR:", AoAR(vss,vy,bank, w))
     print("AoAL:", AoAL(vss,vy,bank, w))
-    print("Fnetx:", Fnetx(vss, vy, bank, w))
-    print("Fnety:", Fnety(vss, vy, bank, w))
+    print("Fnetx:", Fnet(vss, vy, bank, w)[0])
+    print("Fnety:", Fnet(vss, vy, bank, w)[1])
     print("Tnet:", Tnet(vss, vy, bank, w))
