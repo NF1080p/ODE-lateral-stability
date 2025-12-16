@@ -1,6 +1,10 @@
+"""
+Analytical solution for lateral stability simulation. Experimental version 6. V5 was used for graphs in report.
+(archived)
+"""
 from sympy import symbols, Function, Eq, dsolve, latex, lambdify, Symbol
 import matplotlib.pyplot as plt
-import physics
+import physics_backup as physics
 import grapher
 import numpy as np
 

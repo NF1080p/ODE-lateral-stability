@@ -51,12 +51,12 @@ bank_eqn = general_solution[2].rhs
 C1, C2, C3, C4, C5, C6 = symbols('C1 C2 C3 C4 C5 C6')
 
 integration_constants = {
-    C1: 1.0,
-    C2: 1.0,
-    C3: 1.0,
-    C4: 1.0,
-    C5: 1.0,
-    C6: 1.0
+    C1: 1.0e6,    # Very strong roll moment response (increased order of magnitude)
+    C2: -1.0e6,   # Increased coupling between roll and lateral motion (stronger influence)
+    C3: 1.0e4,    # Increased frequency (faster oscillations)
+    C4: -1.0e2,   # Reduced damping (more sustained oscillations)
+    C5: -1.0e2,   # Further reduced damping (more oscillatory behavior)
+    C6: 1.0e3     # Amplify the initial perturbation or response
 }
 
 x_specific = x_eqn.subs(integration_constants)
