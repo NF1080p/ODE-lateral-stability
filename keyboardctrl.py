@@ -1,4 +1,5 @@
 from pynput import keyboard
+import physics
 import threading
 
 #Please note: keyboard listener automatically records keyboard inputs but only if typed into the console. Press A to bank left and D to bank right from viewer POV, and P to toggle autopilot.
@@ -14,6 +15,8 @@ Error handling for non-alphanumeric key presses without char attribute.
 '''
 def on_press(key, injected):
     global aileron_input, ap_on
+    if physics.Keyboard_Control == False:
+        return
     try:
         if key.char == 'p':
             ap_on = 1 - ap_on
@@ -28,8 +31,7 @@ def on_press(key, injected):
                     aileron_input -= 2
 
     except AttributeError:
-        print('Special key {} pressed'.format(
-            key))
+        pass
 
 def on_release(key, injected):
     if key == keyboard.Key.esc:
