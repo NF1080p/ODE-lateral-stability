@@ -79,6 +79,9 @@ def second_order_DE_rk4(x, y, bank, dx, dy, dbank, dt):
 
     # Keyboard aileron control
 
+    
+    def inject_aileron_control(dx, dy, bank, dbank):
+
     '''Use ap_on and aileron_input variables as defined in keyboardctrl.py
     Float parameters dx, dy, bank, dbank used to define attitude and calculate natural torque with physics.Tnet
     Autopilot queried for updated global aileron_input, assume resultant torque is linear
@@ -93,12 +96,13 @@ def second_order_DE_rk4(x, y, bank, dx, dy, dbank, dt):
     Returns:
         float: sum of torques
     '''
-    def inject_aileron_control(dx, dy, bank, dbank):
         T_natural = physics.Tnet(dx, dy, bank, dbank)
         ap(kb.ap_on, bank, dbank)
         T_input = kb.aileron_input * -300
         return T_natural + T_input
 
+    
+    def ap(ap_on, bank, dbank):
     '''Use ap_on and aileron_input variables as defined in keyboardctrl.py
     If autopilot active, update global aileron_input with output from autopilot.
     If bank angle is greater than 0.01 degrees in either direction, then increment autopilot input by an amount proportional to bank angle and bank rate. Otherwise, reset ailerons.
@@ -111,7 +115,6 @@ def second_order_DE_rk4(x, y, bank, dx, dy, dbank, dt):
     Returns:
         None
     '''
-    def ap(ap_on, bank, dbank):
         if ap_on:
             if (bank < -0.01 and kb.aileron_input < 30) or (bank > 0.01 and kb.aileron_input > -30):
                 kb.aileron_input -= bank/5 + dbank/3
@@ -378,3 +381,4 @@ def second_order_DE(y0, yprime0, a, b, c, f_t, steps, endval):
 
 
     return y
+
