@@ -8,10 +8,17 @@ aileron_input = 0
 
 ap_on = 0
 
-'''on_press and on_release adapted from the function use case given in pynput official documentation https://pypi.org/project/pynput/.
+'''
+on_press and on_release adapted from the function use case given in pynput official documentation https://pypi.org/project/pynput/.
 Note: injection refers to a "virtual" key press and is not used here.
-Built-in char attribute of key pressed influences global parameters: P changes global ap_on and A and D change global aileron_input.
+Built-in char attribute of key pressed influences global parameters: P toggles global ap_on and A and D change global aileron_input.
 Error handling for non-alphanumeric key presses without char attribute.
+
+Args:
+    key (pynput.keyboard.Key) - the key signal received
+    injected (Boolean) - whether the key was physically pressed; not used
+Returns:
+    None
 '''
 def on_press(key, injected):
     global aileron_input, ap_on
@@ -44,6 +51,7 @@ listener = keyboard.Listener(
     on_press=on_press,
     on_release=on_release)
 listener.start()
+
 
 
 
