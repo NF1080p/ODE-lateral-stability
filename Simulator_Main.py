@@ -52,7 +52,7 @@ class AircraftVisualizer(pyglet.window.Window):
         # vvvv USER INPUTS vvvv
         physics.globalize_physics_vars(dihedral=7, # 7, 0, -3
                                        Mass=900, 
-                                       WingLength=7.5, #5 (small), 7.5 (large), 5.25 (no const alt), 5.75 (const alt 15)
+                                       WingLength=5, #5 (small), 7.5 (large), 5.25 (no const alt), 5.75 (const alt 15)
                                        WingWidth=1.6, #1.6
                                        BodyArea=8,
                                        cLift_a0=0.25, 
@@ -62,7 +62,7 @@ class AircraftVisualizer(pyglet.window.Window):
                                        I_roll=1000, 
                                        drag_mult=1,
                                        Constant_Altitude=True,
-                                       Autopilot=False,
+                                       Autopilot=True,
                                        Keyboard_Control=False
                                        )
         
@@ -163,7 +163,7 @@ class AircraftVisualizer(pyglet.window.Window):
 
         # initialize autopilot
         if physics.Autopilot:
-            kb.ap(kb.ap_on)
+            kb.ap_on = 1
 
 
 
