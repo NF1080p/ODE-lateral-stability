@@ -22,9 +22,9 @@ class AircraftVisualizer(pyglet.window.Window):
              try dihedral = -3 for a small anhedral angle typical of some military aircraft
              try dihedral = 5 for a moderate dihedral angle typical of many general aviation aircraft
              try dihedral = 0 for flat wing like many fighter jets
-         Mass: kg of aircraft (1000 is default)
-         WingLength: length of wing from body to tip in meters (8 is default)
-         WingWidth: width of wing from front to back in meters (1 is default)
+         Mass: kg of aircraft (900 is default)
+         WingLength: length of wing from body to tip in meters (5.5 is default)
+         WingWidth: width of wing from front to back in meters (1.5 is default)
          BodyArea: cross-sectional area of the body in m^2 (5 is default)
          cLift_a0: lift coefficient at 0 angle of attack (0.25 is default)
          cL_slope: lift coefficient slope per degree angle of attack (0.2 is default)
@@ -39,14 +39,21 @@ class AircraftVisualizer(pyglet.window.Window):
 
          self.aircraft_angle: initial bank angle in degrees (5.0 is a good perturbation amount to view stability)
          self.worldscale: zoom level for visualizer (10 is default, can decrease if simulation ends by world exit too quickly)
+
+            Example aircraft parameters for reference:
+         PA-28 : wing length 5m, wing chord average 1.6m, mass 900 kg, body area ~10m^2, cruise speed 52m/s (100 kts), dihedral 0°, I_roll ~ 1000
+         C172 (scale 10) (default): wing length 5.5m, wing chord average 1.5m, mass 900kg, body area ~8m^2, cruise speed 52m/s (100 kts), dihedral 0°, I_roll ~ 1000
+         B747 (scale 5): wing length 32m, wing chord average 8m, mass 350 000kg, body area ~500m^2, cruise speed 260m/s (520 kts), dihedral 3°, I_roll ~ 1000000
+         
+         NOTE: sprites are only visual indicators of dihedral type and do not represent actual aircraft types or scales.
          '''
 
         # vvvv USER INPUTS vvvv
-        physics.globalize_physics_vars(dihedral=3, 
-                                       Mass=1000, 
-                                       WingLength=5.5, 
-                                       WingWidth=1.5, 
-                                       BodyArea=5,
+        physics.globalize_physics_vars(dihedral=7, 
+                                       Mass=900, 
+                                       WingLength=5, 
+                                       WingWidth=1.6, 
+                                       BodyArea=8,
                                        cLift_a0=0.25, 
                                        cL_slope=0.2,
                                        altitude=1000, 
@@ -58,6 +65,7 @@ class AircraftVisualizer(pyglet.window.Window):
         
         self.aircraft_angle = 5.0  # starting perturbed angle in degrees, 0 is level flight
         self.worldscale = 10  # zoom level, 10 is default
+        self.timeout = 250 # seconds until automatic timeout, set to None to disable automatic timeout
 
         # -- USER INPUTS END HERE --
         
@@ -130,6 +138,7 @@ class AircraftVisualizer(pyglet.window.Window):
         self.label_pos = pyglet.text.Label('', x=15, y=WINDOW_HEIGHT-610)
         self.label_bank = pyglet.text.Label('', x=15, y=WINDOW_HEIGHT-640)
         self.label_dbank = pyglet.text.Label('', x=15, y=WINDOW_HEIGHT-670)
+        self.label_time = pyglet.text.Label('', x=700, y=WINDOW_HEIGHT-610)
         self.label_liftl = pyglet.text.Label('', x=700, y=WINDOW_HEIGHT-30)
         self.label_liftr = pyglet.text.Label('', x=350, y=WINDOW_HEIGHT-30)
 
@@ -217,6 +226,10 @@ class AircraftVisualizer(pyglet.window.Window):
             print("Aircraft has exceeded safe bank angle. Simulation ending.")
             pyglet.app.exit()
 
+        elif (self.timeout is not None) and (self.runtime >= self.timeout):
+            print("Simulation has reached timeout limit. Simulation ending.")
+            pyglet.app.exit()
+
         # Save position vs time data to txt file
         with open(self.data_path_name, "a") as f:
             stringified = str(self.x1) + " " + str(self.y1) + " " + str(self.bank1) + " " + str(self.runtime) + "\n"
@@ -229,6 +242,7 @@ class AircraftVisualizer(pyglet.window.Window):
         self.label_pos.text = f"Aircraft position: ({self.aircraft_x:.1f}, {self.aircraft_y:.1f})"
         self.label_bank.text = f"Bank: {self.aircraft_angle:.1f}°"
         self.label_dbank.text = f"Angular velocity: {self.aircraft_dangle:.1f}°/s"
+        self.label_time.text = f"Time: {self.runtime:.1f} s"
         # AoAl = physics.AoAL(self.aircraft_dx, self.aircraft_dy, self.aircraft_angle, self.aircraft_dangle)
         # AoAr = physics.AoAR(self.aircraft_dx, self.aircraft_dy, self.aircraft_angle, self.aircraft_dangle)
         # Liftl = physics.leftlift_F(self.aircraft_angle, AoAl)
@@ -285,8 +299,9 @@ class AircraftVisualizer(pyglet.window.Window):
         self.label_pos.draw()
         self.label_bank.draw()
         self.label_dbank.draw()
-        self.label_liftl.draw()
-        self.label_liftr.draw()
+        # self.label_liftl.draw()
+        # self.label_liftr.draw()
+        self.label_time.draw()
 
 if __name__ == "__main__":
     """

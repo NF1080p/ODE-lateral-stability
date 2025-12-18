@@ -38,7 +38,7 @@ def globalize_physics_vars(dihedral=0, Mass=1000, WingLength=4, WingWidth=1, Bod
     P0 = 101325  # sea level standard pressure Pa
     T0 = 288.15  # sea level standard temperature K
 
-    cd_body = 0.47 #sphere
+    cd_body = 1.1 #cylinder cross flow for high reynolds numbers
 
     # Calculated Constants
     #LATEX

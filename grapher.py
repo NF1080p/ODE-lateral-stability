@@ -11,7 +11,7 @@ files.sort(key=os.path.getmtime)
 file_path = files[-1] # Get most recently modified file; most recent simulation data
 print(file_path)
 
-def plot_solution(sol_list, t_list, title="a cool title"):
+def plot_solution(sol_list, t_list, title="a cool title", xlabel="time (s)", ylabel="something cool"):
     """
     Plot sol_list vs t_list
 
@@ -19,8 +19,14 @@ def plot_solution(sol_list, t_list, title="a cool title"):
         sol_list (list): y series 
         t_list (list): t series
         title (str, optional): graph title. Defaults to "a cool title".
+        xlabel (str, optional): x axis label. Defaults to "time (s)".
+        ylabel (str, optional): y axis label. Defaults to "something cool".
     """
+    
     plt.figure()
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.grid()
     plt.plot(t_list, sol_list)
     plt.title(title)
     plt.show(block=False)
@@ -45,9 +51,9 @@ def plot_solution_from_file(filename=file_path):
             y_list.append(float(values[1]))
             bank_list.append(float(values[2]))
             t_list.append(float(values[3]))
-    plot_solution(x_list, t_list, "x vs t")
-    plot_solution(y_list, t_list, "y vs t")
-    plot_solution(bank_list, t_list, "bank vs t")
+    plot_solution(x_list, t_list, "x vs t", ylabel="x position (m)")
+    plot_solution(y_list, t_list, "y vs t", ylabel="y position (m)")
+    plot_solution(bank_list, t_list, "Bank vs t", ylabel="bank angle (°)")
     plt.show()
 
 def plot_solution_more_params(sol_list, t_list, title="a cool title", xlabel="time (s)", ylabel="something cool"):
