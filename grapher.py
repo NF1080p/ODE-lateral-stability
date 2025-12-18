@@ -33,7 +33,7 @@ def plot_solution(sol_list, t_list, title="a cool title", xlabel="time (s)", yla
     
 def plot_solution_from_file(filename=file_path):
     """
-    Plot x,y,bank vs t data from a text file
+    Plot x,y,bank vs t data from most recent text file
 
     Args:
         filename (string, optional): text file path. Defaults to file_path.

@@ -72,7 +72,10 @@ def second_order_DE_rk4(x, y, bank, dx, dy, dbank, dt):
         return dbank
     
     def f_ddbank(dx, dy, bank, dbank):
-        return -(1/physics.I_roll) * inject_aileron_control(dx, dy, bank, dbank) # inputs to Tnet are vss, vy, bank, w
+        if physics.Autopilot:
+            return -(1/physics.I_roll) * inject_aileron_control(dx, dy, bank, dbank) # inputs to Tnet are vss, vy, bank, w
+        else:
+            return -(1/physics.I_roll) * physics.Tnet(dx, dy, bank, dbank) # inputs to Tnet are vss, vy, bank, w
 
     # Keyboard aileron control
 
@@ -80,7 +83,6 @@ def second_order_DE_rk4(x, y, bank, dx, dy, dbank, dt):
         T_natural = physics.Tnet(dx, dy, bank, dbank)
         ap(kb.ap_on)
         T_input = kb.aileron_input * -300
-        #print(T_natural, T_input)
         return T_natural + T_input
     
     def ap(ap_on):

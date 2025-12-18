@@ -4,7 +4,8 @@ import math
      
 
 def globalize_physics_vars(dihedral=0, Mass=1000, WingLength=4, WingWidth=1, BodyArea=5,
-                                cLift_a0=0.25, cL_slope=0.2, altitude=1000, cruise=52, I_roll=1000, drag_mult = 3, Constant_Altitude = False):
+                                cLift_a0=0.25, cL_slope=0.2, altitude=1000, cruise=52, 
+                                I_roll=1000, drag_mult = 3, Constant_Altitude = False, Autopilot = False):
      # Variables
     dihedral = dihedral # positive for dihedral, negative for anhedral
 
@@ -60,7 +61,7 @@ def globalize_physics_vars(dihedral=0, Mass=1000, WingLength=4, WingWidth=1, Bod
         "altitude", "cruise",
         "R0", "cp", "M", "L", "g", "rho0", "P0", "T0",
         "cd_body", "Cdbody",
-        "PA", "TA", "rhoA", "WingArea", "I_roll", "Cdbody", "drag_mult", "STALLANGLE", "Constant_Altitude"
+        "PA", "TA", "rhoA", "WingArea", "I_roll", "Cdbody", "drag_mult", "STALLANGLE", "Constant_Altitude", "Autopilot"
     ]
      
     for _name in _physics_vars:
