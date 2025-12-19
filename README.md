@@ -8,17 +8,19 @@ This repo contains code for our MAT292 Final Project. We created a simulation to
 
 ## Installation
 
-Our code is written in Python3. To reproduce our results, start by installing the dependencies.
+Our code is written in Python3. To reproduce our results, please ensure you have Python3.8+ Then:
 
 1. Clone this repository
 2. Create and activate virtual environment in Python
-3. Install the dependendencies: `pip install pyglet numpy pynput matplotlib sympy`
+3. Install the dependendencies: `pip install pyglet numpy pynput matplotlib sympy`.
+
 
 Alternative (No virtual environment)
 
-1a. Clone this repository
-2a. Ensure python 3, math, matplotlib, numpy, os, pynput, sympy, and pyglet are installed via 'pip install' commands
-3a. Open the repository directory in a python environment (vscode)
+
+&nbsp;&nbsp;&nbsp;&nbsp;1a. Clone this repository\
+&nbsp;&nbsp;&nbsp;&nbsp;2a. Ensure python 3, math, matplotlib, numpy, os, pynput, sympy, and pyglet are installed via 'pip install' commands\
+&nbsp;&nbsp;&nbsp;&nbsp;3a. Open the repository directory in a python environment (vscode)\
 
 4. Set the desired initial variables in the __init__ function of Simulator_Main.py
 5. Variables are preset with defaults and recommended variables are described in full 
