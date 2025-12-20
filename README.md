@@ -19,7 +19,7 @@ Alternative (No virtual environment)
 
 
 &nbsp;&nbsp;&nbsp;&nbsp;1a. Clone this repository\
-&nbsp;&nbsp;&nbsp;&nbsp;2a. Ensure python 3, math, matplotlib, numpy, os, pynput, sympy, and pyglet are installed via 'pip install' commands\
+&nbsp;&nbsp;&nbsp;&nbsp;2a. Ensure `math`, `matplotlib`, `numpy`, `os`, `pynput`, `sympy`, and `pyglet` are installed via `pip install` commands\
 &nbsp;&nbsp;&nbsp;&nbsp;3a. Open the repository directory in a python environment (vscode)\
 
 4. Set the desired initial variables in the `__init__` function of Simulator_Main.py
