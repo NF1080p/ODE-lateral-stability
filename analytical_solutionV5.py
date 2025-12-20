@@ -9,6 +9,9 @@ import physics_backup as physics
 import grapher
 import numpy as np
 
+plt.rcParams.update({'font.size': 14}) # make plot font size bigger
+
+
 # variables
 t = symbols('t')
 x = Function('x')
@@ -76,7 +79,7 @@ integration_constants_anhedral = {
     C6: -1e-2
 }
 
-integration_constants = integration_constants_dihedral
+integration_constants = integration_constants_anhedral
 
 x_specific = x_eqn.subs(integration_constants)
 y_specific = y_eqn.subs(integration_constants)
