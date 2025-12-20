@@ -34,8 +34,8 @@ Alternative (No virtual environment)
 12. Once satisfied, end the sim by closing the GUI. The sim will end automatically if the aircaft hits one of its failure conditions
 
 This generates a file called `data-SIM_START_DATE_AND_TIME.txt` in the folder `./data/`. This file is formatted as:
-    ```
-    horizontal position (m)     vertical position (m)     bank angle (deg)    time (s)
-    ```
+
+    ``` horizontal position (m)     vertical position (m)     bank angle (deg)    time (s) ```
+    
 13. To plot this data, run `python grapher.py`. The most recent set of data will be plotted.
 
