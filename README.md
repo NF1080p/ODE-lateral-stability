@@ -22,7 +22,7 @@ Alternative (No virtual environment)
 &nbsp;&nbsp;&nbsp;&nbsp;2a. Ensure python 3, math, matplotlib, numpy, os, pynput, sympy, and pyglet are installed via 'pip install' commands\
 &nbsp;&nbsp;&nbsp;&nbsp;3a. Open the repository directory in a python environment (vscode)\
 
-4. Set the desired initial variables in the __init__ function of Simulator_Main.py
+4. Set the desired initial variables in the `__init__` function of Simulator_Main.py
 5. Variables are preset with defaults and recommended variables are described in full
     in comments above the call to `globalize_physics_vars()`. To start the sim with autopilot engaged, toggle change the input `Autopilot` to `True` (`Autopilot=True`). By default, the sim starts with autopilot off.  
 6. To run the sim, run `python Simulator_Main.py` in your terminal. A GUI will pop up showing the aircraft motion. 
