@@ -81,21 +81,20 @@ def second_order_DE_rk4(x, y, bank, dx, dy, dbank, dt):
 
     
     def inject_aileron_control(dx, dy, bank, dbank):
+        """Use ap_on and aileron_input variables as defined in keyboardctrl.py
+        Float parameters dx, dy, bank, dbank used to define attitude and calculate natural torque with physics.Tnet
+        Autopilot queried for updated global aileron_input, assume resultant torque is linear
+        Note: -300 is an arbitrary coefficient to match approximate magnitudes of forced torque and natural torque, but can be substituted with any negative number
+        Total torque is returned as sum of natural and input (forced) torques
 
-    '''Use ap_on and aileron_input variables as defined in keyboardctrl.py
-    Float parameters dx, dy, bank, dbank used to define attitude and calculate natural torque with physics.Tnet
-    Autopilot queried for updated global aileron_input, assume resultant torque is linear
-    Note: -300 is an arbitrary coefficient to match approximate magnitudes of forced torque and natural torque, but can be substituted with any negative number
-    Total torque is returned as sum of natural and input (forced) torques
-
-    Args:
-        dx (float): horizontal velocity
-        dy (float): vertical velocity
-        bank (float): bank angle
-        dbank (float): (bank) angular velocity
-    Returns:
-        float: sum of torques
-    '''
+        Args:
+            dx (float): horizontal velocity
+            dy (float): vertical velocity
+            bank (float): bank angle
+            dbank (float): (bank) angular velocity
+        Returns:
+            float: sum of torques
+        """
         T_natural = physics.Tnet(dx, dy, bank, dbank)
         ap(kb.ap_on, bank, dbank)
         T_input = kb.aileron_input * -300
@@ -103,18 +102,18 @@ def second_order_DE_rk4(x, y, bank, dx, dy, dbank, dt):
 
     
     def ap(ap_on, bank, dbank):
-    '''Use ap_on and aileron_input variables as defined in keyboardctrl.py
-    If autopilot active, update global aileron_input with output from autopilot.
-    If bank angle is greater than 0.01 degrees in either direction, then increment autopilot input by an amount proportional to bank angle and bank rate. Otherwise, reset ailerons.
-    Note: 1/5 and 1/3 are arbitrary constants and can be adjusted.
+        """Use ap_on and aileron_input variables as defined in keyboardctrl.py
+        If autopilot active, update global aileron_input with output from autopilot.
+        If bank angle is greater than 0.01 degrees in either direction, then increment autopilot input by an amount proportional to bank angle and bank rate. Otherwise, reset ailerons.
+        Note: 1/5 and 1/3 are arbitrary constants and can be adjusted.
 
-    Args:
-        ap_on (int): Autopilot status
-        bank (float): bank angle
-        dbank (float): (bank) angular velocity
-    Returns:
-        None
-    '''
+        Args:
+            ap_on (int): Autopilot status
+            bank (float): bank angle
+            dbank (float): (bank) angular velocity
+        Returns:
+            None
+        """
         if ap_on:
             if (bank < -0.01 and kb.aileron_input < 30) or (bank > 0.01 and kb.aileron_input > -30):
                 kb.aileron_input -= bank/5 + dbank/3
