@@ -1,10 +1,22 @@
 # ODE-lateral-stability
 
-This repo contains code for our MAT292 Final Project. We created a simulation to help analyze lateral stability in an aircraft. 
-
-(copy paste shortened version of our intro here)
+This repo contains code for our MAT292 Final Project. 
 
 
+Our goal was to explore how passive aircraft geometry and active autopilots are used in maintaining stable flight during cruise conditions. Our product is a two dimensional lateral stability aircraft simulation with a working autopilot. The most important files and their description are included below. 
+
+<div align="center">
+
+| File name | Description |
+| ------- | ---- |
+| Simulator_Main.py | Aircraft simulation user interface |
+| physics.py | The simulation physics engine. Contains equations of motion and values of constants |
+| secondOrderDE.py | Solves second order differential equations numerically. Used to generate the aircraft flight path |
+| analytical_solutionV5.py | Solves linearized equations of motion to obtain an analytical approximation of the aircraft behaviour |
+| grapher.py | Graphs bank angle, horizontal position, and vertical position of the aircraft flight data from simulation |
+| keyboardctrl.py | Let's the user toggle autopilot and manual aileron control |
+
+</div>
 
 ## Installation
 
@@ -35,7 +47,7 @@ Alternative (No virtual environment)
 
 This generates a file called `data-SIM_START_DATE_AND_TIME.txt` in the folder `./data/`. This file is formatted as:
 
-    ``` horizontal position (m)     vertical position (m)     bank angle (deg)    time (s) ```
+    horizontal position (m)     vertical position (m)     bank angle (deg)    time (s) 
     
 13. To plot this data, run `python grapher.py`. The most recent set of data will be plotted.
 
