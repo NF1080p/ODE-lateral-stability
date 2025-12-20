@@ -5,7 +5,7 @@ Version 5. Graphs used in report generated in this file
 """
 from sympy import symbols, Function, Eq, dsolve, latex, lambdify, Symbol
 import matplotlib.pyplot as plt
-import physics_backup as physics
+import archive.physics_backup as physics
 import grapher
 import numpy as np
 
@@ -79,7 +79,7 @@ integration_constants_anhedral = {
     C6: -1e-2
 }
 
-integration_constants = integration_constants_anhedral
+integration_constants = integration_constants_dihedral
 
 x_specific = x_eqn.subs(integration_constants)
 y_specific = y_eqn.subs(integration_constants)
@@ -97,6 +97,12 @@ bank_numpy = lambdify(t, bank_specific, "numpy")
 x_numpy_neg = lambdify(t, x_specific_neg, "numpy")
 y_numpy_neg = lambdify(t, y_specific_neg, "numpy")
 bank_numpy_neg = lambdify(t, bank_specific_neg, "numpy")
+
+# print out LaTeX equation output
+print("Equations formatted in LaTeX:")
+#print("bank(t) DIHEDRAL = {}".format(latex(bank_specific)))
+print("bank(t) ANHEDRAL = {}".format(latex(bank_specific_neg)))
+
 
 # plot
 t_list = np.linspace(0, 13, 1000) # lambda function are cool. it can compute x_numpy for an arbitrary size of t_list :O
