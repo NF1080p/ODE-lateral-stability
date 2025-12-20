@@ -62,8 +62,8 @@ class AircraftVisualizer(pyglet.window.Window):
                                        I_roll=1000, 
                                        drag_mult=1,
                                        Constant_Altitude=True,
-                                       Autopilot=True,
-                                       Keyboard_Control=False
+                                       Autopilot=False,
+                                       Keyboard_Control=True
                                        )
         
         self.aircraft_angle = 30.0  # starting perturbed angle in degrees, 0 is level flight, 5 will show growth, 30 will show decay, 15 for critical 

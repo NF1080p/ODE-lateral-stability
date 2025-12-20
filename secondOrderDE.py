@@ -40,7 +40,7 @@ def euler(x, y, bank, dx, dy, dbank, dt):
     
 def second_order_DE_rk4(x, y, bank, dx, dy, dbank, dt):
     """
-    Second Order Nonlinear Differential Equation Solver using 4th order Runga Kutta
+    Second Order Nonlinear Differential Equation Solver using 4th order Runge Kutta
     Args:
         x (float): horizontal position
         y (float): vertical position
