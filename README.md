@@ -32,10 +32,10 @@ Alternative (No virtual environment)
 10. The terminal should acknowledge the input and will attempt to stabilize the aircraft.
 11. In some cases of anhedral, stabilization may be impossible if the autopilot is activated too late.
 12. Once satisfied, end the sim by closing the GUI. The sim will end automatically if the aircaft hits one of its failure conditions
-13. This generates a file called `data-SIM_START_DATE_AND_TIME.txt` in the folder `./data/`. This file is formatted as:
+
+This generates a file called `data-SIM_START_DATE_AND_TIME.txt` in the folder `./data/`. This file is formatted as:
     ```
     horizontal position (m)     vertical position (m)     bank angle (deg)    time (s)
     ```
-14. To plot this data, run `python grapher.py`.
-15. The most recent set of data will be plotted.
+13. To plot this data, run `python grapher.py`. The most recent set of data will be plotted.
 
